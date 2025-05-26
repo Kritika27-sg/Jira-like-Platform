@@ -17,7 +17,6 @@ def create_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # All roles can add comments except Guests (not defined)
     comment = Comment(
         content=comment_in.content,
         task_id=comment_in.task_id,

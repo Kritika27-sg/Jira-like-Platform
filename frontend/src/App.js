@@ -90,7 +90,6 @@ function App() {
             path="/tasks/:taskId/comments"
             element={
               <PrivateRoute>
-                {/* Assuming you will create a TaskDetails page to pass taskId */}
                 <CommentList />
               </PrivateRoute>
             }

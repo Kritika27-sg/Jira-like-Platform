@@ -23,18 +23,8 @@ const LoginPage = () => {
         await signUp({ name, email, password, role });
         alert('Account created successfully! You can now log in.');
         setIsNewUser(false); // Switch to login mode after successful sign-up, user still needs to explicitly log in
-        // OR, if you want them immediately on dashboard after signup, use:
-        // navigate('/dashboard', { replace: true });
       } else {
-        // Login logic
-        // This part currently doesn't call an API in your AuthContext.js
-        // If you had a login API call in AuthContext, it would look like this:
-        // await login({ email, password });
-        // For demonstration purposes, assuming 'login' handles the actual login and sets 'user'
-        // For a real scenario, you'd call an API here and then call context's login
         login({ id: 1, email: email, full_name: "Logged In User", role: "Client" }); // Placeholder for actual login
-
-        // *** IMPORTANT CHANGE HERE ***
         navigate('/dashboard', { replace: true }); // Replace the current history entry
       }
     } catch (error) {
@@ -55,7 +45,6 @@ const LoginPage = () => {
       const data = await res.json();
       login(data.user); // Use the login function from context
       localStorage.setItem('jira-token', data.access_token);
-      // *** IMPORTANT CHANGE HERE ***
       navigate('/dashboard', { replace: true }); // Replace the current history entry
     } catch (error) {
       alert('Authentication failed: ' + error.message);

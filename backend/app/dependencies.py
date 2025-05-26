@@ -8,7 +8,7 @@ from app.models.user import User
 SECRET_KEY = "your_jwt_secret_key"
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")  # Update if you have a token route
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")  
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(

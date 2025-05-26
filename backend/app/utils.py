@@ -1,5 +1,3 @@
-# You can put helper functions here as needed, e.g., for activity logging
-
 def log_activity(db_session, task_id, user_id, action):
     from app.models.activity_log import ActivityLog
 

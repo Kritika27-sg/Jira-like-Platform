@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin # Assuming you'll create UserLogin schema
+from app.schemas.user import UserCreate, UserLogin 
 from app.dependencies import get_db
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router = APIRouter()
 GOOGLE_CLIENT_ID = "1080816176181-p23c90520lrbhc1blep9q4pak6j14ei3.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "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"
 GOOGLE_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
-SECRET_KEY = "your_jwt_secret_key" # IMPORTANT: Use a strong, truly random secret key in production
+SECRET_KEY = "your_jwt_secret_key" 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
@@ -69,7 +69,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         }
     }
 
-# --- Optional: User Login Endpoint (if you also want traditional login) ---
+# --- Optional: User Login Endpoint ---
 @router.post("/login", response_model=dict)
 async def login_for_access_token(user_credentials: UserLogin, db: Session = Depends(get_db)):
     """
@@ -103,7 +103,6 @@ async def login_for_access_token(user_credentials: UserLogin, db: Session = Depe
 
 @router.get('/google/callback')
 async def google_callback(token: str = Query(...), db: Session = Depends(get_db)):
-    # ... (your existing Google callback logic) ...
     try:
         # Verify the token with Google
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
@@ -118,10 +117,7 @@ async def google_callback(token: str = Query(...), db: Session = Depends(get_db)
         # Check if user exists, create if not
         user = db.query(User).filter(User.email == email).first()
         if not user:
-            # Default role is Client; Admins must be configured separately
-            # IMPORTANT: For Google sign-up, you might not have a password, so `hashed_password` could be None or a default.
-            # Make sure your User model handles nullable `hashed_password` or provides a suitable default for Google users.
-            user = User(email=email, full_name=full_name, role=role, google_id=google_id) # Or a placeholder
+            user = User(email=email, full_name=full_name, role=role, google_id=google_id) 
             db.add(user)
             db.commit()
             db.refresh(user)

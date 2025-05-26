@@ -45,7 +45,6 @@ def list_projects(
         projects = db.query(Project).filter(Project.owner_id == current_user.id).all()
     elif current_user.role in ["Developer", "Client"]:
         # Developers and Clients can see projects where they have tasks or are client
-        # For simplicity, show all projects - improve per real rules later
         projects = db.query(Project).all()
     else:
         projects = []
@@ -68,7 +67,7 @@ def get_project(
     if current_user.role == "Project Manager" and project.owner_id == current_user.id:
         return project
     
-    # Developers and Clients can view projects (adjust as needed)
+    # Developers and Clients can view projects 
     if current_user.role in ["Developer", "Client"]:
         return project
 
