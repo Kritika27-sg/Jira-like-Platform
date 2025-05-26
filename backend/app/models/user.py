@@ -11,3 +11,6 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     role = Column(String, nullable=False)  # 'Admin', 'Project Manager', 'Developer', 'Client'
     google_id = Column(String, unique=True, nullable=True)  # For Google OAuth identification
+
+def __repr__(self):
+        return f"<User(email='{self.email}', full_name='{self.full_name}', role='{self.role}')>"
