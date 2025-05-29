@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin 
 from app.dependencies import get_db
+import bcrypt
 
 router = APIRouter()
 
@@ -25,7 +26,14 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# --- New: User Registration Endpoint ---
+# Function to hash passwords
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+# Function to verify passwords
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+# --- User Registration Endpoint ---
 @router.post("/register", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
@@ -36,15 +44,18 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists."
+            detail="User  with this email already exists."
         )
 
+    # Hash the password before storing it
+    hashed_password = hash_password(user_data.password)  # Ensure user_data has a password field
 
     # Create new user in the database
     db_user = User(
         full_name=user_data.full_name,
         email=user_data.email,
-        role=user_data.role # Ensure role is validated if needed
+        role=user_data.role,  # Ensure role is validated if needed
+        hashed_password=hashed_password
     )
     db.add(db_user)
     db.commit()
@@ -58,7 +69,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     )
 
     return {
-        "message": "User registered successfully",
+        "message": "User  registered successfully",
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
@@ -69,7 +80,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         }
     }
 
-# --- Optional: User Login Endpoint ---
+# --- User Login Endpoint ---
 @router.post("/login", response_model=dict)
 async def login_for_access_token(user_credentials: UserLogin, db: Session = Depends(get_db)):
     """
@@ -100,7 +111,6 @@ async def login_for_access_token(user_credentials: UserLogin, db: Session = Depe
         }
     }
 
-
 @router.get('/google/callback')
 async def google_callback(token: str = Query(...), db: Session = Depends(get_db)):
     try:
@@ -117,7 +127,9 @@ async def google_callback(token: str = Query(...), db: Session = Depends(get_db)
         # Check if user exists, create if not
         user = db.query(User).filter(User.email == email).first()
         if not user:
-            user = User(email=email, full_name=full_name, role=role, google_id=google_id) 
+            # Assign a default role for new users signing up via Google
+            default_role = "Client"  # Change this to whatever default role 
+            user = User(email=email, full_name=full_name, role=default_role, google_id=google_id) 
             db.add(user)
             db.commit()
             db.refresh(user)

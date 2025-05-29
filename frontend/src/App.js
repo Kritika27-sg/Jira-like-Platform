@@ -5,16 +5,12 @@ import Login from './components/auth/Login';
 import Logout from './components/auth/Logout';
 import Dashboard from './components/common/Dashboard';
 import PrivateRoute from './components/common/PrivateRoute';
-
 import ProjectList from './components/projects/ProjectList';
 import ProjectForm from './components/projects/ProjectForm';
-
 import TaskList from './components/tasks/TaskList';
 import TaskForm from './components/tasks/TaskForm';
-
 import UserList from './components/users/UserList';
 import UserForm from './components/users/UserForm';
-
 import CommentList from './components/comments/CommentList';
 import ActivityLogList from './components/activityLog/ActivityLogList';
 
@@ -25,7 +21,18 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
-
+          
+          {/* Add explicit /dashboard route */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          
+          {/* Keep root route for backward compatibility */}
           <Route
             path="/"
             element={
@@ -34,7 +41,7 @@ function App() {
               </PrivateRoute>
             }
           />
-
+          
           <Route
             path="/projects"
             element={
@@ -51,7 +58,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/tasks"
             element={
@@ -68,7 +74,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/users"
             element={
@@ -85,7 +90,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/tasks/:taskId/comments"
             element={
@@ -94,7 +98,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/tasks/:taskId/activity-log"
             element={
@@ -103,8 +106,9 @@ function App() {
               </PrivateRoute>
             }
           />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
+          
+          {/* Catch all - redirect to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
@@ -112,4 +116,3 @@ function App() {
 }
 
 export default App;
-

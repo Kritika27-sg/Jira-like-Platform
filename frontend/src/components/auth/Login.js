@@ -3,125 +3,258 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const clientId = '1080816176181-p23c90520lrbhc1blep9q4pak6j14ei3.apps.googleusercontent.com'; 
+const clientId = '1080816176181-p23c90520lrbhc1blep9q4pak6j14ei3.apps.googleusercontent.com';
 
 const LoginPage = () => {
-  const { login, signUp } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [isNewUser, setIsNewUser] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Client'); // Default role: Client
+  // State for switching between login and register
+  const [isLogin, setIsLogin] = useState(true);
+  
+  // Login form states
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  
+  // Registration form states
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerRole, setRegisterRole] = useState('Client'); // Default role
+  const [registerPassword, setRegisterPassword] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      if (isNewUser) {
-        // Sign-up logic
-        await signUp({ name, email, password, role });
-        alert('Account created successfully! You can now log in.');
-        setIsNewUser(false); // Switch to login mode after successful sign-up, user still needs to explicitly log in
-      } else {
-        login({ id: 1, email: email, full_name: "Logged In User", role: "Client" }); // Placeholder for actual login
-        navigate('/dashboard', { replace: true }); // Replace the current history entry
+      const response = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
       }
+
+      const data = await response.json();
+      
+      // Store token and user data
+      localStorage.setItem('jira-token', data.access_token);
+      login(data.user);
+      
+      navigate('/dashboard', { replace: true });
     } catch (error) {
-      alert('Operation failed: ' + error.message);
+      alert('Login failed: ' + error.message);
     }
   };
 
-  const handleSuccess = async (credentialResponse) => {
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Registration form submitted');
+
+    try {
+      const registrationData = {
+        full_name: registerName,
+        email: registerEmail,
+        role: registerRole,
+        password: registerPassword
+      };
+      
+      console.log('Sending registration data:', registrationData);
+
+      const response = await fetch('http://localhost:8000/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData)
+      });
+
+      console.log('Registration response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Registration error:', errorData);
+        throw new Error(errorData.detail || 'Registration failed');
+      }
+
+      const data = await response.json();
+      console.log('Registration successful, received data:', data);
+      
+      // Store token and user data
+      localStorage.setItem('jira-token', data.access_token);
+      await login(data.user);
+      
+      console.log('About to navigate to dashboard');
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Registration failed: ' + error.message);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    console.log('Google login initiated');
     const googleToken = credentialResponse.credential;
 
     try {
+      console.log('Sending Google token to backend');
       const res = await fetch(`http://localhost:8000/auth/google/callback?token=${googleToken}`);
+      
+      console.log('Google callback response status:', res.status);
+      
       if (!res.ok) {
         const errorData = await res.json();
+        console.error('Google login error:', errorData);
         throw new Error(errorData.detail || 'Google login failed');
       }
 
       const data = await res.json();
-      login(data.user); // Use the login function from context
+      console.log('Google login successful, received data:', data);
+      
+      // Store token and login user
       localStorage.setItem('jira-token', data.access_token);
-      navigate('/dashboard', { replace: true }); // Replace the current history entry
+      await login(data.user);
+      
+      console.log('About to navigate to dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (error) {
+      console.error('Google authentication error:', error);
       alert('Authentication failed: ' + error.message);
     }
   };
 
-  const handleError = () => {
+  const handleGoogleError = () => {
     alert('Google login failed');
   };
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div style={styles.container}>
+        {/* Title Text */}
+        <h1 style={styles.titleText}>JIRA-LIKE PLATFORM</h1>
+
         <div style={styles.loginBox}>
-          <h2 style={styles.title}>{isNewUser ? 'Create Account' : 'Welcome!'}</h2>
-          <form onSubmit={handleSubmit} style={styles.form}>
-            {isNewUser && (
-              <>
-                <label htmlFor="name" style={styles.label}>Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  placeholder="Enter your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={styles.input}
-                  required
-                />
-                <label htmlFor="role" style={styles.label}>Role</label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  style={{ ...styles.input, ...styles.selectInput }}
-                  required
-                >
-                  <option value="Client">Client</option>
-                  <option value="Developer">Developer</option>
-                  <option value="Project Manager">Project Manager</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </>
-            )}
-            <label htmlFor="email" style={styles.label}>Email</label>
-            <input
-              type="email"
-              id="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              required
-            />
-            <label htmlFor="password" style={styles.label}>Password</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              required
-            />
-            <button type="submit" style={styles.button}>{isNewUser ? 'Sign Up' : 'Login'}</button>
-          </form>
+          <h2 style={styles.subtitle}>
+            {isLogin ? 'Welcome Back!' : 'Create Account'}
+          </h2>
+          
+          {/* Toggle buttons */}
+          <div style={styles.toggleContainer}>
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              style={{
+                ...styles.toggleButton,
+                ...(isLogin ? styles.activeToggle : styles.inactiveToggle)
+              }}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              style={{
+                ...styles.toggleButton,
+                ...(!isLogin ? styles.activeToggle : styles.inactiveToggle)
+              }}
+            >
+              Register
+            </button>
+          </div>
+
+          {/* Login Form */}
+          {isLogin ? (
+            <form onSubmit={handleLoginSubmit} style={styles.form}>
+              <label htmlFor="loginEmail" style={styles.label}>Email</label>
+              <input
+                type="email"
+                id="loginEmail"
+                placeholder="Enter your email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                style={styles.input}
+                required
+              />
+
+              <label htmlFor="loginPassword" style={styles.label}>Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter your password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                style={styles.input}
+                required
+              />
+              
+              <button type="submit" style={styles.button}>Login</button>
+            </form>
+          ) : (
+            /* Registration Form */
+            <form onSubmit={handleRegisterSubmit} style={styles.form}>
+              <label htmlFor="registerName" style={styles.label}>Full Name</label>
+              <input
+                type="text"
+                id="registerName"
+                placeholder="Enter your full name"
+                value={registerName}
+                onChange={(e) => setRegisterName(e.target.value)}
+                style={styles.input}
+                required
+              />
+
+              <label htmlFor="registerEmail" style={styles.label}>Email</label>
+              <input
+                type="email"
+                id="registerEmail"
+                placeholder="Enter your email"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                style={styles.input}
+                required
+              />
+              
+              <label htmlFor="registerRole" style={styles.label}>Role</label>
+              <select
+                id="registerRole"
+                value={registerRole}
+                onChange={(e) => setRegisterRole(e.target.value)}
+                style={styles.input}
+                required
+              >
+                <option value="Client">Client</option>
+                <option value="Admin">Admin</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="Developer">Developer</option>
+              </select>
+
+              <label htmlFor="registerPassword" style={styles.label}>Password</label>
+              <input
+                type="password"
+                id="registerPassword"
+                placeholder="Enter your password"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                style={styles.input}
+                required
+              />
+              
+              <button type="submit" style={styles.button}>Register</button>
+            </form>
+          )}
+
           <div style={styles.orSeparator}>OR</div>
           <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={handleError}
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
           />
-          <div style={styles.toggleLink}>
-            {isNewUser ? (
-              <span>Already have an account? <button onClick={() => setIsNewUser(false)} style={styles.linkButton}>Login</button></span>
-            ) : (
-              <span>New user? <button onClick={() => setIsNewUser(true)} style={styles.linkButton}>Create Account</button></span>
-            )}
-          </div>
         </div>
       </div>
     </GoogleOAuthProvider>
@@ -132,11 +265,18 @@ const styles = {
   container: {
     minHeight: '100vh',
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     background: 'linear-gradient(135deg, #667eea, #764ba2)',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     padding: '20px',
+  },
+  titleText: {
+    fontSize: '50px',
+    fontFamily: "'Arial', sans-serif",
+    color: '#fff',
+    marginBottom: '40px',
   },
   loginBox: {
     backgroundColor: '#fff',
@@ -148,9 +288,33 @@ const styles = {
     boxSizing: 'border-box',
     textAlign: 'center',
   },
-  title: {
-    marginBottom: '30px',
+  subtitle: {
+    marginBottom: '20px',
     color: '#333',
+  },
+  toggleContainer: {
+    display: 'flex',
+    marginBottom: '30px',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    border: '1px solid #ddd',
+  },
+  toggleButton: {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+  },
+  activeToggle: {
+    backgroundColor: '#667eea',
+    color: '#fff',
+  },
+  inactiveToggle: {
+    backgroundColor: '#f8f9fa',
+    color: '#666',
   },
   form: {
     display: 'flex',
@@ -171,14 +335,6 @@ const styles = {
     outline: 'none',
     transition: 'border-color 0.3s ease',
   },
-  selectInput: {
-    appearance: 'none',
-    backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23667eea\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E")',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 15px center',
-    backgroundSize: '16px',
-    paddingRight: '40px',
-  },
   button: {
     padding: '14px',
     backgroundColor: '#667eea',
@@ -189,25 +345,11 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'background-color 0.3s ease',
+    marginBottom: '20px',
   },
   orSeparator: {
     margin: '20px 0',
     color: '#777',
-  },
-  googleButton: {
-    marginTop: '10px',
-  },
-  toggleLink: {
-    marginTop: '15px',
-    color: '#555',
-  },
-  linkButton: {
-    background: 'none',
-    border: 'none',
-    color: '#667eea',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    padding: 0,
   },
 };
 
