@@ -13,10 +13,8 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && storedToken) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log('Loaded user from localStorage:', parsedUser);
         setUser(parsedUser);
       } catch (error) {
-        console.error('Error parsing stored user data:', error);
         // Clear corrupted data
         localStorage.removeItem('jira-user');
         localStorage.removeItem('jira-token');
@@ -27,19 +25,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      console.log('Login function called with:', credentials);
-      
       // If credentials is already a user object (from Google login or direct call), use it directly
       if (credentials.id && credentials.email) {
-        console.log('Direct user login (Google or registration):', credentials);
         setUser(credentials);
         localStorage.setItem('jira-user', JSON.stringify(credentials));
-        console.log('User state updated, localStorage updated');
         return credentials;
       }
 
       // Otherwise, it's email/password login
-      console.log('Email/password login attempt');
       const response = await fetch('http://localhost:8000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,7 +48,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log('Login API successful:', data.user);
       
       // Store user data and token
       setUser(data.user);
@@ -64,7 +56,6 @@ export const AuthProvider = ({ children }) => {
       
       return data;
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     }
   };
@@ -88,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log('User registered:', data.user);
 
       // Automatically log in the user after successful registration
       setUser(data.user);
@@ -97,13 +87,11 @@ export const AuthProvider = ({ children }) => {
 
       return data;
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     }
   };
 
   const logout = () => {
-    console.log('User logged out');
     setUser(null);
     localStorage.removeItem('jira-user');
     localStorage.removeItem('jira-token');
