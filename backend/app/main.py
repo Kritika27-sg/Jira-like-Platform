@@ -5,10 +5,10 @@ from app.api import auth, users, projects, tasks, comments, activity_log
 
 app = FastAPI(title="Jira-Like Platform Backend")
 
-# Setup CORS (adjust origins in production)
+# Seting up CORS 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server URL
+    allow_origins=["http://localhost:3000"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
