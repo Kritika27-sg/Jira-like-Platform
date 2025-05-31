@@ -54,9 +54,9 @@ const LoginPage = () => {
     }
   };
 
+
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    console.log('Registration form submitted');
 
     try {
       const registrationData = {
@@ -65,9 +65,6 @@ const LoginPage = () => {
         role: registerRole,
         password: registerPassword
       };
-      
-      console.log('Sending registration data:', registrationData);
-
       const response = await fetch('http://localhost:8000/auth/register', {
         method: 'POST',
         headers: {
@@ -75,65 +72,45 @@ const LoginPage = () => {
         },
         body: JSON.stringify(registrationData)
       });
-
-      console.log('Registration response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Registration error:', errorData);
         throw new Error(errorData.detail || 'Registration failed');
       }
-
       const data = await response.json();
-      console.log('Registration successful, received data:', data);
-      
       // Store token and user data
       localStorage.setItem('jira-token', data.access_token);
       await login(data.user);
-      
-      console.log('About to navigate to dashboard');
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      console.error('Registration error:', error);
       alert('Registration failed: ' + error.message);
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    console.log('Google login initiated');
-    const googleToken = credentialResponse.credential;
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const googleToken = credentialResponse.credential;
     try {
-      console.log('Sending Google token to backend');
       const res = await fetch(`http://localhost:8000/auth/google/callback?token=${googleToken}`);
-      
-      console.log('Google callback response status:', res.status);
-      
       if (!res.ok) {
         const errorData = await res.json();
-        console.error('Google login error:', errorData);
         throw new Error(errorData.detail || 'Google login failed');
       }
-
       const data = await res.json();
-      console.log('Google login successful, received data:', data);
-      
       // Store token and login user
       localStorage.setItem('jira-token', data.access_token);
       await login(data.user);
-      
-      console.log('About to navigate to dashboard');
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      console.error('Google authentication error:', error);
       alert('Authentication failed: ' + error.message);
     }
   };
-
   const handleGoogleError = () => {
     alert('Google login failed');
   };
 
+
+  
+  //UI 
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div style={styles.container}>
