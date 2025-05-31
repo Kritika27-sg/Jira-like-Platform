@@ -24,19 +24,12 @@ const PrivateRoute = ({ children }) => {
   const token = getToken();
   const authenticated = isAuthenticated();
   
-  // Debug logging (remove in production)
-  console.log('PrivateRoute - User:', user);
-  console.log('PrivateRoute - Token exists:', !!token);
-  console.log('PrivateRoute - Is authenticated:', authenticated);
-
   // If no user or no token, redirect to login
   if (!user || !token || !authenticated) {
-    console.log('PrivateRoute - Redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // User is authenticated, render the protected component
-  console.log('PrivateRoute - Rendering protected content');
   return children;
 };
 
