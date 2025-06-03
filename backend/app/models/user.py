@@ -10,7 +10,7 @@ class User(Base):
     full_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=True)  # Nullable for Google OAuth users
     is_active = Column(Boolean, default=True)
-    role = Column(String, nullable=False)  # 'Admin', 'Project Manager', 'Developer', 'Client'
+    role = Column(String, nullable=False)  # 'Project Manager', 'Developer', 'Client'
     google_id = Column(String, unique=True, nullable=True)  # For Google OAuth identification
 
 def __repr__(self):

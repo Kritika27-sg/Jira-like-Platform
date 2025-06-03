@@ -19,8 +19,13 @@ const LoginPage = () => {
   // Registration form states
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
-  const [registerRole, setRegisterRole] = useState('Client'); // Default role
+  const [registerRole, setRegisterRole] = useState('Client');
   const [registerPassword, setRegisterPassword] = useState('');
+
+  // Google signup role selection state
+  const [showGoogleRoleSelection, setShowGoogleRoleSelection] = useState(false);
+  const [googleCredential, setGoogleCredential] = useState(null);
+  const [selectedGoogleRole, setSelectedGoogleRole] = useState('Client');
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -44,7 +49,6 @@ const LoginPage = () => {
 
       const data = await response.json();
       
-      // Store token and user data
       localStorage.setItem('jira-token', data.access_token);
       login(data.user);
       
@@ -53,7 +57,6 @@ const LoginPage = () => {
       alert('Login failed: ' + error.message);
     }
   };
-
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -77,7 +80,6 @@ const LoginPage = () => {
         throw new Error(errorData.detail || 'Registration failed');
       }
       const data = await response.json();
-      // Store token and user data
       localStorage.setItem('jira-token', data.access_token);
       await login(data.user);
       navigate('/dashboard', { replace: true });
@@ -86,152 +88,316 @@ const LoginPage = () => {
     }
   };
 
-
   const handleGoogleSuccess = async (credentialResponse) => {
     const googleToken = credentialResponse.credential;
+    
+    // If it's a login attempt, proceed directly
+    if (isLogin) {
+      try {
+        const res = await fetch(`http://localhost:8000/auth/google/callback?token=${googleToken}`);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || 'Google login failed');
+        }
+        const data = await res.json();
+        localStorage.setItem('jira-token', data.access_token);
+        await login(data.user);
+        navigate('/dashboard', { replace: true });
+      } catch (error) {
+        alert('Authentication failed: ' + error.message);
+      }
+    } else {
+      // For signup, show role selection first
+      setGoogleCredential(googleToken);
+      setShowGoogleRoleSelection(true);
+    }
+  };
+
+  const handleGoogleSignupWithRole = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/auth/google/callback?token=${googleToken}`);
+      const res = await fetch(`http://localhost:8000/auth/google/callback?token=${googleCredential}&role=${selectedGoogleRole}`);
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.detail || 'Google login failed');
+        throw new Error(errorData.detail || 'Google signup failed');
       }
       const data = await res.json();
-      // Store token and login user
       localStorage.setItem('jira-token', data.access_token);
       await login(data.user);
       navigate('/dashboard', { replace: true });
     } catch (error) {
       alert('Authentication failed: ' + error.message);
+    } finally {
+      setShowGoogleRoleSelection(false);
+      setGoogleCredential(null);
+      setSelectedGoogleRole('Client');
     }
   };
+
+  const handleCancelGoogleSignup = () => {
+    setShowGoogleRoleSelection(false);
+    setGoogleCredential(null);
+    setSelectedGoogleRole('Client');
+  };
+
   const handleGoogleError = () => {
     alert('Google login failed');
   };
 
+  // Role selection modal for Google signup
+  if (showGoogleRoleSelection) {
+    return (
+      <GoogleOAuthProvider clientId={clientId}>
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <div style={styles.logoContainer}>
+              <svg width="32" height="32" viewBox="0 0 32 32" style={styles.logo}>
+                <defs>
+                  <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:1}} />
+                  </linearGradient>
+                </defs>
+                <rect width="32" height="32" rx="6" fill="url(#grad1)"/>
+                <path d="M8 8h6v6H8V8zm0 10h6v6H8v-6zm10-10h6v6h-6V8z" fill="white"/>
+                <path d="M18 18h6v6h-6v-6z" fill="white" fillOpacity="0.8"/>
+              </svg>
+              <span style={styles.logoText}>Jira</span>
+            </div>
+          </div>
 
-  
-  //UI 
+          <div style={styles.mainContent}>
+            <div style={styles.loginCard}>
+              <div style={styles.cardHeader}>
+                <h1 style={styles.title}>Select Your Role</h1>
+                <p style={styles.subtitle}>
+                  Please select your role to complete your Google sign-up.
+                </p>
+              </div>
+
+              <div style={styles.form}>
+                <div style={styles.inputGroup}>
+                  <label htmlFor="googleRole" style={styles.label}>
+                    Role *
+                  </label>
+                  <select
+                    id="googleRole"
+                    value={selectedGoogleRole}
+                    onChange={(e) => setSelectedGoogleRole(e.target.value)}
+                    style={styles.select}
+                    required
+                  >
+                    <option value="Client">Client</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Developer">Developer</option>
+                  </select>
+                </div>
+
+                <div style={styles.buttonGroup}>
+                  <button 
+                    type="button" 
+                    onClick={handleGoogleSignupWithRole}
+                    style={styles.primaryButton}
+                  >
+                    Complete Sign Up
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleCancelGoogleSignup}
+                    style={styles.secondaryButton}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </GoogleOAuthProvider>
+    );
+  }
+
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div style={styles.container}>
-        {/* Title Text */}
-        <h1 style={styles.titleText}>JIRA-LIKE PLATFORM</h1>
-
-        <div style={styles.loginBox}>
-          <h2 style={styles.subtitle}>
-            {isLogin ? 'Welcome Back!' : 'Create Account'}
-          </h2>
-          
-          {/* Toggle buttons */}
-          <div style={styles.toggleContainer}>
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              style={{
-                ...styles.toggleButton,
-                ...(isLogin ? styles.activeToggle : styles.inactiveToggle)
-              }}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              style={{
-                ...styles.toggleButton,
-                ...(!isLogin ? styles.activeToggle : styles.inactiveToggle)
-              }}
-            >
-              Register
-            </button>
+        {/* Header */}
+        <div style={styles.header}>
+          <div style={styles.logoContainer}>
+            <svg width="32" height="32" viewBox="0 0 32 32" style={styles.logo}>
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:1}} />
+                  <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:1}} />
+                </linearGradient>
+              </defs>
+              <rect width="32" height="32" rx="6" fill="url(#grad1)"/>
+              <path d="M8 8h6v6H8V8zm0 10h6v6H8v-6zm10-10h6v6h-6V8z" fill="white"/>
+              <path d="M18 18h6v6h-6v-6z" fill="white" fillOpacity="0.8"/>
+            </svg>
+            <span style={styles.logoText}>Jira</span>
           </div>
+        </div>
 
-          {/* Login Form */}
-          {isLogin ? (
-            <form onSubmit={handleLoginSubmit} style={styles.form}>
-              <label htmlFor="loginEmail" style={styles.label}>Email</label>
-              <input
-                type="email"
-                id="loginEmail"
-                placeholder="Enter your email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                style={styles.input}
-                required
-              />
+        {/* Main Content */}
+        <div style={styles.mainContent}>
+          <div style={styles.loginCard}>
+            <div style={styles.cardHeader}>
+              <h1 style={styles.title}>
+                {isLogin ? 'Log in to your account' : 'Sign up for your account'}
+              </h1>
+              <p style={styles.subtitle}>
+                {isLogin 
+                  ? 'Enter your email address and password to access your account.' 
+                  : 'Create your account to get started with Jira.'
+                }
+              </p>
+            </div>
 
-              <label htmlFor="loginPassword" style={styles.label}>Password</label>
-              <input
-                type="password"
-                id="loginPassword"
-                placeholder="Enter your password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                style={styles.input}
-                required
-              />
-              
-              <button type="submit" style={styles.button}>Login</button>
-            </form>
-          ) : (
-            /* Registration Form */
-            <form onSubmit={handleRegisterSubmit} style={styles.form}>
-              <label htmlFor="registerName" style={styles.label}>Full Name</label>
-              <input
-                type="text"
-                id="registerName"
-                placeholder="Enter your full name"
-                value={registerName}
-                onChange={(e) => setRegisterName(e.target.value)}
-                style={styles.input}
-                required
-              />
-
-              <label htmlFor="registerEmail" style={styles.label}>Email</label>
-              <input
-                type="email"
-                id="registerEmail"
-                placeholder="Enter your email"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
-                style={styles.input}
-                required
-              />
-              
-              <label htmlFor="registerRole" style={styles.label}>Role</label>
-              <select
-                id="registerRole"
-                value={registerRole}
-                onChange={(e) => setRegisterRole(e.target.value)}
-                style={styles.input}
-                required
+            {/* Tab Navigation */}
+            <div style={styles.tabContainer}>
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                style={{
+                  ...styles.tab,
+                  ...(isLogin ? styles.activeTab : styles.inactiveTab)
+                }}
               >
-                <option value="Client">Client</option>
-                <option value="Admin">Admin</option>
-                <option value="Project Manager">Project Manager</option>
-                <option value="Developer">Developer</option>
-              </select>
+                Log in
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                style={{
+                  ...styles.tab,
+                  ...(!isLogin ? styles.activeTab : styles.inactiveTab)
+                }}
+              >
+                Sign up
+              </button>
+            </div>
 
-              <label htmlFor="registerPassword" style={styles.label}>Password</label>
-              <input
-                type="password"
-                id="registerPassword"
-                placeholder="Enter your password"
-                value={registerPassword}
-                onChange={(e) => setRegisterPassword(e.target.value)}
-                style={styles.input}
-                required
+            {/* Google Login */}
+            <div style={styles.googleContainer}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                size="large"
+                width="100%"
+                text={isLogin ? "signin_with" : "signup_with"}
               />
-              
-              <button type="submit" style={styles.button}>Register</button>
-            </form>
-          )}
+            </div>
 
-          <div style={styles.orSeparator}>OR</div>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
+            <div style={styles.divider}>
+              <span style={styles.dividerText}>OR</span>
+            </div>
+
+            {/* Forms */}
+            {isLogin ? (
+              <form onSubmit={handleLoginSubmit} style={styles.form}>
+                <div style={styles.inputGroup}>
+                  <label htmlFor="loginEmail" style={styles.label}>
+                    Email address *
+                  </label>
+                  <input
+                    type="email"
+                    id="loginEmail"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label htmlFor="loginPassword" style={styles.label}>
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+
+                <button type="submit" style={styles.primaryButton}>
+                  Log in
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegisterSubmit} style={styles.form}>
+                <div style={styles.inputGroup}>
+                  <label htmlFor="registerName" style={styles.label}>
+                    Full name *
+                  </label>
+                  <input
+                    type="text"
+                    id="registerName"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    style={styles.input}
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label htmlFor="registerEmail" style={styles.label}>
+                    Email address *
+                  </label>
+                  <input
+                    type="email"
+                    id="registerEmail"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label htmlFor="registerRole" style={styles.label}>
+                    Role *
+                  </label>
+                  <select
+                    id="registerRole"
+                    value={registerRole}
+                    onChange={(e) => setRegisterRole(e.target.value)}
+                    style={styles.select}
+                    required
+                  >
+                    <option value="Client">Client</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Developer">Developer</option>
+                  </select>
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label htmlFor="registerPassword" style={styles.label}>
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    id="registerPassword"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+
+                <button type="submit" style={styles.primaryButton}>
+                  Sign up
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </GoogleOAuthProvider>
@@ -241,92 +407,206 @@ const LoginPage = () => {
 const styles = {
   container: {
     minHeight: '100vh',
+    backgroundColor: '#FAFBFC',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     display: 'flex',
     flexDirection: 'column',
+  },
+  header: {
+    padding: '24px 32px',
+    borderBottom: '1px solid #DFE1E6',
+    backgroundColor: '#FFFFFF',
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  logo: {
+    borderRadius: '6px',
+  },
+  logoText: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#172B4D',
+  },
+  mainContent: {
+    flex: 1,
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: '20px',
+    padding: '40px 24px',
   },
-  titleText: {
-    fontSize: '50px',
-    fontFamily: "'Arial', sans-serif",
-    color: '#fff',
-    marginBottom: '40px',
-  },
-  loginBox: {
-    backgroundColor: '#fff',
-    borderRadius: '12px',
-    boxShadow: '0 8px 16px rgba(0,0,0,0.25)',
+  loginCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    boxShadow: '0px 8px 24px rgba(9, 30, 66, 0.15)',
+    border: '1px solid #DFE1E6',
     padding: '40px',
-    maxWidth: '400px',
     width: '100%',
-    boxSizing: 'border-box',
+    maxWidth: '400px',
+  },
+  cardHeader: {
     textAlign: 'center',
+    marginBottom: '32px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 8px 0',
+    lineHeight: '28px',
   },
   subtitle: {
-    marginBottom: '20px',
-    color: '#333',
-  },
-  toggleContainer: {
-    display: 'flex',
-    marginBottom: '30px',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    border: '1px solid #ddd',
-  },
-  toggleButton: {
-    flex: 1,
-    padding: '10px',
-    border: 'none',
-    cursor: 'pointer',
     fontSize: '14px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '20px',
+  },
+  tabContainer: {
+    display: 'flex',
+    marginBottom: '24px',
+    borderBottom: '2px solid #F4F5F7',
+    position: 'relative',
+  },
+  tab: {
+    flex: 1,
+    padding: '12px 0',
+    border: 'none',
+    backgroundColor: 'transparent',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    position: 'relative',
+    transition: 'color 0.2s ease',
+  },
+  activeTab: {
+    color: '#0052CC',
+    '::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: '-2px',
+      left: '0',
+      right: '0',
+      height: '2px',
+      backgroundColor: '#0052CC',
+    },
+  },
+  inactiveTab: {
+    color: '#6B778C',
+  },
+  googleContainer: {
+    marginBottom: '24px',
+  },
+  divider: {
+    position: 'relative',
+    textAlign: 'center',
+    margin: '24px 0',
+    '::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '0',
+      right: '0',
+      height: '1px',
+      backgroundColor: '#DFE1E6',
+    },
+  },
+  dividerText: {
+    backgroundColor: '#FFFFFF',
+    color: '#6B778C',
+    padding: '0 16px',
+    fontSize: '12px',
     fontWeight: '600',
-    transition: 'all 0.3s ease',
-  },
-  activeToggle: {
-    backgroundColor: '#667eea',
-    color: '#fff',
-  },
-  inactiveToggle: {
-    backgroundColor: '#f8f9fa',
-    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    textAlign: 'left',
+  },
+  inputGroup: {
+    marginBottom: '20px',
   },
   label: {
-    marginBottom: '8px',
+    display: 'block',
+    fontSize: '12px',
     fontWeight: '600',
-    color: '#555',
+    color: '#5E6C84',
+    marginBottom: '4px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
   input: {
-    padding: '12px 15px',
-    marginBottom: '20px',
-    borderRadius: '8px',
-    border: '1px solid #ccc',
-    fontSize: '16px',
+    width: '100%',
+    padding: '8px 12px',
+    border: '2px solid #DFE1E6',
+    borderRadius: '3px',
+    fontSize: '14px',
+    color: '#172B4D',
+    backgroundColor: '#FAFBFC',
     outline: 'none',
-    transition: 'border-color 0.3s ease',
+    transition: 'border-color 0.2s ease, background-color 0.2s ease',
+    boxSizing: 'border-box',
+    height: '40px',
+    ':focus': {
+      borderColor: '#0052CC',
+      backgroundColor: '#FFFFFF',
+    },
   },
-  button: {
-    padding: '14px',
-    backgroundColor: '#667eea',
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '8px',
+  select: {
+    width: '100%',
+    padding: '8px 12px',
+    border: '2px solid #DFE1E6',
+    borderRadius: '3px',
+    fontSize: '14px',
+    color: '#172B4D',
+    backgroundColor: '#FAFBFC',
+    outline: 'none',
+    transition: 'border-color 0.2s ease, background-color 0.2s ease',
+    boxSizing: 'border-box',
+    height: '40px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-    marginBottom: '20px',
   },
-  orSeparator: {
-    margin: '20px 0',
-    color: '#777',
+  primaryButton: {
+    width: '100%',
+    padding: '10px 16px',
+    backgroundColor: '#0052CC',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '3px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+    marginTop: '8px',
+    height: '40px',
+    ':hover': {
+      backgroundColor: '#0065FF',
+    },
+  },
+  secondaryButton: {
+    width: '100%',
+    padding: '10px 16px',
+    backgroundColor: 'transparent',
+    color: '#6B778C',
+    border: '2px solid #DFE1E6',
+    borderRadius: '3px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'border-color 0.2s ease, color 0.2s ease',
+    marginTop: '8px',
+    height: '40px',
+    ':hover': {
+      borderColor: '#B3BAC5',
+      color: '#172B4D',
+    },
+  },
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   },
 };
 

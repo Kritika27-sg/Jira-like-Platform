@@ -22,7 +22,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
           
-          {/* Add explicit /dashboard route */}
           <Route
             path="/dashboard"
             element={
@@ -32,7 +31,6 @@ function App() {
             }
           />
           
-          {/* Keep root route for backward compatibility */}
           <Route
             path="/"
             element={

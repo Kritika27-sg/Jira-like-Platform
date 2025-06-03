@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
       } catch (error) {
+        console.error('Error parsing stored user data:', error);
         // Clear corrupted data
         localStorage.removeItem('jira-user');
         localStorage.removeItem('jira-token');
@@ -26,10 +27,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       // If credentials is already a user object (from Google login or direct call), use it directly
-      if (credentials.id && credentials.email) {
+      if (credentials && credentials.id && credentials.email) {
         setUser(credentials);
         localStorage.setItem('jira-user', JSON.stringify(credentials));
-        return credentials;
+        return { user: credentials };
       }
 
       // Otherwise, it's email/password login
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }) => {
       
       return data;
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   };
@@ -79,14 +81,47 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-
+      
       // Automatically log in the user after successful registration
       setUser(data.user);
       localStorage.setItem('jira-user', JSON.stringify(data.user));
       localStorage.setItem('jira-token', data.access_token);
-
+      
       return data;
     } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
+
+  // Google OAuth login/signup handler
+  const googleAuth = async (googleToken, role = null) => {
+    try {
+      let url = `http://localhost:8000/auth/google/callback?token=${googleToken}`;
+      if (role) {
+        url += `&role=${role}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Google authentication failed');
+      }
+
+      const data = await response.json();
+      
+      // Store user data and token
+      setUser(data.user);
+      localStorage.setItem('jira-user', JSON.stringify(data.user));
+      localStorage.setItem('jira-token', data.access_token);
+      
+      return data;
+    } catch (error) {
+      console.error('Google auth error:', error);
       throw error;
     }
   };
@@ -114,19 +149,55 @@ export const AuthProvider = ({ children }) => {
       logout();
       return false;
     }
+
+    try {
+      // You can add a token validation endpoint to your FastAPI backend
+      // For now, we'll just check if the token exists and is not expired
+      // You might want to decode the JWT and check expiration
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      
+      if (payload.exp < currentTime) {
+        logout();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      logout();
+      return false;
+    }
+  };
+
+  // Get user role
+  const getUserRole = () => {
+    return user?.role || null;
+  };
+
+  // Check if user has specific role
+  const hasRole = (role) => {
+    return user?.role === role;
+  };
+
+  // Check if user has any of the specified roles
+  const hasAnyRole = (roles) => {
+    return roles.includes(user?.role);
   };
 
   const contextValue = {
     user,
     login,
     register,
+    googleAuth,
     logout,
     loading,
     isAuthenticated,
     getToken,
     validateToken,
-    // Keep signUp for backward compatibility
-    signUp: register
+    getUserRole,
+    hasRole,
+    hasAnyRole
   };
 
   return (
