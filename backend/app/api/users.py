@@ -1,3 +1,4 @@
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -86,3 +87,5 @@ def delete_user(
     db.delete(user)
     db.commit()
     return
+
+"""
