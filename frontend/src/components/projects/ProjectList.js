@@ -2,10 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 
-const buttonColor = '#667eea';
-const deleteColor = '#ef4444';
-const updateColor = '#10b981';
-
 const ProjectList = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
@@ -37,7 +33,6 @@ const ProjectList = () => {
       });
       if (!res.ok) throw new Error('Failed to delete project');
       
-      // Remove project from local state
       setProjects(projects.filter(p => p.id !== projectId));
       setShowDeleteModal(false);
       setSelectedProject(null);
@@ -61,8 +56,6 @@ const ProjectList = () => {
       if (!res.ok) throw new Error('Failed to update project');
       
       const updatedProject = await res.json();
-      
-      // Update project in local state
       setProjects(projects.map(p => 
         p.id === selectedProject.id ? updatedProject : p
       ));
@@ -103,76 +96,142 @@ const ProjectList = () => {
   if (loading) {
     return (
       <div style={styles.container}>
-        <p style={styles.message}>Loading projects...</p>
-      </div>
-    );
-  }
-
-  if (!projects.length) {
-    return (
-      <div style={styles.container}>
-        <p style={styles.message}>No projects found.</p>
-        {(user.role === 'Admin' || user.role === 'Project Manager') && (
-          <Link to="/projects/new" style={{ textDecoration: 'none' }}>
-            <button style={styles.createButton}>Create New Project</button>
-          </Link>
-        )}
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Loading projects...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={styles.container}>
-      <div style={styles.headerContainer}>
-        <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-          <button style={styles.backButton}>← Back to Dashboard</button>
-        </Link>
-        <h2 style={styles.header}>Projects</h2>
-      </div>
-      <ul style={styles.projectList}>
-        {projects.map((p) => (
-          <li key={p.id} style={styles.projectItem}>
-            <strong>{p.name}</strong>: {p.description || '-'}
-          </li>
-        ))}
-      </ul>
-      
-      {(user.role === 'Admin' || user.role === 'Project Manager') && (
-        <div style={styles.buttonContainer}>
-          <Link to="/projects/new" style={{ textDecoration: 'none' }}>
-            <button style={styles.createButton}>Create New Project</button>
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <Link to="/dashboard" style={styles.backLink}>
+            <button style={styles.backButton}>
+              ← Back to Dashboard
+            </button>
           </Link>
-          <button style={styles.updateButton} onClick={openUpdateModal}>
-            Update Project
-          </button>
-          <button style={styles.deleteButton} onClick={openDeleteModal}>
-            Delete Project
-          </button>
+          <div style={styles.titleSection}>
+            <h1 style={styles.pageTitle}>📋 Projects</h1>
+            <p style={styles.pageSubtitle}>
+              Manage and view your projects
+            </p>
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            <h3 style={styles.modalHeader}>Delete Project</h3>
-            <p style={styles.modalText}>Select a project to delete:</p>
-            <div style={styles.projectSelection}>
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        {!projects.length ? (
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>📋</div>
+            <h3 style={styles.emptyTitle}>No projects found</h3>
+            <p style={styles.emptySubtitle}>
+              Get started by creating your first project
+            </p>
+            {(user.role === 'Admin' || user.role === 'Project Manager') && (
+              <Link to="/projects/new" style={styles.linkButton}>
+                <button style={styles.primaryButton}>
+                  ➕ Create New Project
+                </button>
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Projects Grid */}
+            <div style={styles.projectsGrid}>
               {projects.map((project) => (
-                <div
-                  key={project.id}
-                  style={{
-                    ...styles.projectOption,
-                    backgroundColor: selectedProject?.id === project.id ? '#fee2e2' : '#f9fafb'
-                  }}
-                  onClick={() => selectProjectForDelete(project)}
-                >
-                  <strong>{project.name}</strong>
-                  <p style={styles.projectDesc}>{project.description || 'No description'}</p>
+                <div key={project.id} style={styles.projectCard}>
+                  <div style={styles.projectHeader}>
+                    <h3 style={styles.projectName}>{project.name}</h3>
+                    <div style={styles.projectBadge}>Active</div>
+                  </div>
+                  <p style={styles.projectDescription}>
+                    {project.description || 'No description provided'}
+                  </p>
+                  <div style={styles.projectFooter}>
+                    <div style={styles.projectStats}>
+                      <span style={styles.statItem}>
+                        <span style={styles.statIcon}>📋</span>
+                        12 Tasks
+                      </span>
+                      <span style={styles.statItem}>
+                        <span style={styles.statIcon}>👥</span>
+                        4 Members
+                      </span>
+                    </div>
+                    <Link to={`/projects/${project.id}`} style={styles.viewLink}>
+                      View →
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
-            <div style={styles.modalButtons}>
+
+            {/* Action Buttons */}
+            {(user.role === 'Admin' || user.role === 'Project Manager') && (
+              <div style={styles.actionsCard}>
+                <h3 style={styles.actionsTitle}>Project Actions</h3>
+                <div style={styles.actionButtons}>
+                  <Link to="/projects/new" style={styles.linkButton}>
+                    <button style={styles.primaryButton}>
+                      ➕ Create New Project
+                    </button>
+                  </Link>
+                  <button style={styles.secondaryButton} onClick={openUpdateModal}>
+                    ✏️ Update Project
+                  </button>
+                  <button style={styles.dangerButton} onClick={openDeleteModal}>
+                    🗑️ Delete Project
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Delete Project</h3>
+              <p style={styles.modalSubtitle}>
+                Select a project to delete. This action cannot be undone.
+              </p>
+            </div>
+            
+            <div style={styles.modalContent}>
+              <div style={styles.projectSelection}>
+                {projects.map((project) => (
+                  <div
+                    key={project.id}
+                    style={{
+                      ...styles.projectOption,
+                      ...(selectedProject?.id === project.id ? styles.projectOptionSelected : {})
+                    }}
+                    onClick={() => selectProjectForDelete(project)}
+                  >
+                    <div style={styles.projectOptionHeader}>
+                      <strong style={styles.projectOptionName}>{project.name}</strong>
+                      {selectedProject?.id === project.id && (
+                        <span style={styles.selectedIndicator}>✓</span>
+                      )}
+                    </div>
+                    <p style={styles.projectOptionDesc}>
+                      {project.description || 'No description'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
               <button
                 style={styles.cancelButton}
                 onClick={() => {
@@ -183,7 +242,10 @@ const ProjectList = () => {
                 Cancel
               </button>
               <button
-                style={styles.confirmDeleteButton}
+                style={{
+                  ...styles.confirmDeleteButton,
+                  ...(selectedProject ? {} : styles.disabledButton)
+                }}
                 onClick={() => handleDeleteProject(selectedProject.id)}
                 disabled={!selectedProject}
               >
@@ -196,12 +258,17 @@ const ProjectList = () => {
 
       {/* Update Modal */}
       {showUpdateModal && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            <h3 style={styles.modalHeader}>Update Project</h3>
-            {!selectedProject ? (
-              <>
-                <p style={styles.modalText}>Select a project to update:</p>
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Update Project</h3>
+              <p style={styles.modalSubtitle}>
+                {!selectedProject ? 'Select a project to update' : 'Update project details'}
+              </p>
+            </div>
+
+            <div style={styles.modalContent}>
+              {!selectedProject ? (
                 <div style={styles.projectSelection}>
                   {projects.map((project) => (
                     <div
@@ -209,62 +276,63 @@ const ProjectList = () => {
                       style={styles.projectOption}
                       onClick={() => selectProjectForUpdate(project)}
                     >
-                      <strong>{project.name}</strong>
-                      <p style={styles.projectDesc}>{project.description || 'No description'}</p>
+                      <div style={styles.projectOptionHeader}>
+                        <strong style={styles.projectOptionName}>{project.name}</strong>
+                        <span style={styles.editIcon}>✏️</span>
+                      </div>
+                      <p style={styles.projectOptionDesc}>
+                        {project.description || 'No description'}
+                      </p>
                     </div>
                   ))}
                 </div>
-                <div style={styles.modalButtons}>
-                  <button
-                    style={styles.cancelButton}
-                    onClick={() => {
-                      setShowUpdateModal(false);
-                      setSelectedProject(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <form onSubmit={handleUpdateProject}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Project Name:</label>
-                  <input
-                    type="text"
-                    value={updateForm.name}
-                    onChange={(e) => setUpdateForm({...updateForm, name: e.target.value})}
-                    style={styles.input}
-                    required
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Description:</label>
-                  <textarea
-                    value={updateForm.description}
-                    onChange={(e) => setUpdateForm({...updateForm, description: e.target.value})}
-                    style={styles.textarea}
-                    rows="3"
-                  />
-                </div>
-                <div style={styles.modalButtons}>
-                  <button
-                    type="button"
-                    style={styles.cancelButton}
-                    onClick={() => {
-                      setShowUpdateModal(false);
-                      setSelectedProject(null);
-                      setUpdateForm({ name: '', description: '' });
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" style={styles.confirmUpdateButton}>
-                    Update Project
-                  </button>
-                </div>
-              </form>
-            )}
+              ) : (
+                <form onSubmit={handleUpdateProject} style={styles.form}>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Project Name</label>
+                    <input
+                      type="text"
+                      value={updateForm.name}
+                      onChange={(e) => setUpdateForm({...updateForm, name: e.target.value})}
+                      style={styles.input}
+                      required
+                      placeholder="Enter project name"
+                    />
+                  </div>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Description</label>
+                    <textarea
+                      value={updateForm.description}
+                      onChange={(e) => setUpdateForm({...updateForm, description: e.target.value})}
+                      style={styles.textarea}
+                      rows="4"
+                      placeholder="Enter project description"
+                    />
+                  </div>
+                </form>
+              )}
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.cancelButton}
+                onClick={() => {
+                  setShowUpdateModal(false);
+                  setSelectedProject(null);
+                  setUpdateForm({ name: '', description: '' });
+                }}
+              >
+                Cancel
+              </button>
+              {selectedProject && (
+                <button
+                  style={styles.confirmUpdateButton}
+                  onClick={handleUpdateProject}
+                >
+                  Update Project
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -274,197 +342,398 @@ const ProjectList = () => {
 
 const styles = {
   container: {
-    padding: 20,
-    maxWidth: 640,
-    margin: '40px auto',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: '#333',
-  },
-  message: {
-    fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
-    margin: '30px 0',
+    minHeight: '100vh',
+    backgroundColor: '#FAFBFC',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
   },
   header: {
-    fontSize: 26,
-    margin: 0,
-    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderBottom: '1px solid #DFE1E6',
+    padding: '24px 32px',
   },
-  projectList: {
-    listStyleType: 'disc',
-    paddingLeft: 20,
-    marginBottom: 30,
+  headerContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
   },
-  projectItem: {
-    marginBottom: 12,
-    fontSize: 18,
+  backLink: {
+    textDecoration: 'none',
   },
-  buttonContainer: {
+  backButton: {
+    padding: '8px 16px',
+    backgroundColor: '#F4F5F7',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#172B4D',
+    marginBottom: '16px',
+    transition: 'background-color 0.2s ease',
+  },
+  titleSection: {
+    marginBottom: '8px',
+  },
+  pageTitle: {
+    fontSize: '28px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 8px 0',
+    lineHeight: '32px',
+  },
+  pageSubtitle: {
+    fontSize: '16px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '24px',
+  },
+  mainContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '32px',
+  },
+  loadingContainer: {
     display: 'flex',
-    gap: '10px',
+    flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
+    minHeight: '400px',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '3px solid #DFE1E6',
+    borderTop: '3px solid #0052CC',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingText: {
+    fontSize: '16px',
+    color: '#6B778C',
+    marginTop: '16px',
+    margin: '16px 0 0 0',
+  },
+  emptyState: {
+    textAlign: 'center',
+    padding: '64px 32px',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    border: '1px solid #DFE1E6',
+    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
+  },
+  emptyIcon: {
+    fontSize: '48px',
+    marginBottom: '16px',
+  },
+  emptyTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 8px 0',
+  },
+  emptySubtitle: {
+    fontSize: '14px',
+    color: '#6B778C',
+    margin: '0 0 32px 0',
+  },
+  projectsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+    gap: '24px',
+    marginBottom: '32px',
+  },
+  projectCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DFE1E6',
+    borderRadius: '8px',
+    padding: '24px',
+    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
+    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+    cursor: 'pointer',
+  },
+  projectHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '12px',
+  },
+  projectName: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0',
+    lineHeight: '24px',
+  },
+  projectBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: '#00875A',
+    backgroundColor: '#E3FCEF',
+    padding: '4px 8px',
+    borderRadius: '12px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  projectDescription: {
+    fontSize: '14px',
+    color: '#6B778C',
+    lineHeight: '20px',
+    margin: '0 0 16px 0',
+    minHeight: '40px',
+  },
+  projectFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  projectStats: {
+    display: 'flex',
+    gap: '16px',
+  },
+  statItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '12px',
+    color: '#6B778C',
+  },
+  statIcon: {
+    fontSize: '14px',
+  },
+  viewLink: {
+    fontSize: '14px',
+    color: '#0052CC',
+    textDecoration: 'none',
+    fontWeight: '500',
+  },
+  actionsCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DFE1E6',
+    borderRadius: '8px',
+    padding: '24px',
+    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
+  },
+  actionsTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 16px 0',
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '12px',
     flexWrap: 'wrap',
   },
-  createButton: {
-    padding: '12px 25px',
-    fontSize: 16,
-    fontWeight: 600,
-    color: '#fff',
-    backgroundColor: buttonColor,
-    border: 'none',
-    borderRadius: 8,
-    cursor: 'pointer',
-    boxShadow: `0 3px 8px ${buttonColor}99`,
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+  linkButton: {
+    textDecoration: 'none',
   },
-  updateButton: {
-    padding: '12px 25px',
-    fontSize: 16,
-    fontWeight: 600,
-    color: '#fff',
-    backgroundColor: updateColor,
+  primaryButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    backgroundColor: '#0052CC',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: '4px',
     cursor: 'pointer',
-    boxShadow: `0 3px 8px ${updateColor}99`,
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+    transition: 'background-color 0.2s ease',
   },
-  deleteButton: {
-    padding: '12px 25px',
-    fontSize: 16,
-    fontWeight: 600,
-    color: '#fff',
-    backgroundColor: deleteColor,
+  secondaryButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#172B4D',
+    backgroundColor: '#F4F5F7',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+  },
+  dangerButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    backgroundColor: '#DE350B',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: '4px',
     cursor: 'pointer',
-    boxShadow: `0 3px 8px ${deleteColor}99`,
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+    transition: 'background-color 0.2s ease',
   },
-  modal: {
+  modalOverlay: {
     position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    backgroundColor: 'rgba(9, 30, 66, 0.54)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: '1000',
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 12,
-    maxWidth: 500,
+  modal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    boxShadow: '0 8px 16px rgba(9, 30, 66, 0.25)',
+    maxWidth: '600px',
     width: '90%',
     maxHeight: '80vh',
-    overflowY: 'auto',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+    display: 'flex',
+    flexDirection: 'column',
   },
   modalHeader: {
-    fontSize: 22,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333',
+    padding: '24px 24px 16px 24px',
+    borderBottom: '1px solid #DFE1E6',
   },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: '#666',
+  modalTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 8px 0',
+  },
+  modalSubtitle: {
+    fontSize: '14px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '20px',
+  },
+  modalContent: {
+    padding: '24px',
+    flex: '1',
+    overflowY: 'auto',
+  },
+  modalFooter: {
+    padding: '16px 24px 24px 24px',
+    borderTop: '1px solid #DFE1E6',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
   },
   projectSelection: {
-    marginBottom: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
   },
   projectOption: {
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
-    border: '1px solid #e5e7eb',
+    padding: '16px',
+    border: '1px solid #DFE1E6',
+    borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
+    transition: 'border-color 0.2s ease, background-color 0.2s ease',
+    backgroundColor: '#FAFBFC',
   },
-  projectDesc: {
-    fontSize: 14,
-    color: '#666',
-    margin: '5px 0 0 0',
+  projectOptionSelected: {
+    borderColor: '#0052CC',
+    backgroundColor: '#DEEBFF',
   },
-  modalButtons: {
+  projectOptionHeader: {
     display: 'flex',
-    gap: '10px',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '4px',
   },
-  cancelButton: {
-    padding: '10px 20px',
-    fontSize: 14,
-    fontWeight: 500,
-    color: '#666',
-    backgroundColor: '#f3f4f6',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
+  projectOptionName: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#172B4D',
   },
-  confirmDeleteButton: {
-    padding: '10px 20px',
-    fontSize: 14,
-    fontWeight: 500,
-    color: '#fff',
-    backgroundColor: deleteColor,
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-    opacity: 1,
+  selectedIndicator: {
+    fontSize: '12px',
+    color: '#0052CC',
+    fontWeight: '600',
   },
-  confirmUpdateButton: {
-    padding: '10px 20px',
-    fontSize: 14,
-    fontWeight: 500,
-    color: '#fff',
-    backgroundColor: updateColor,
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
+  editIcon: {
+    fontSize: '12px',
+  },
+  projectOptionDesc: {
+    fontSize: '12px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '16px',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   },
   formGroup: {
-    marginBottom: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   },
   label: {
-    display: 'block',
-    fontSize: 14,
-    fontWeight: 500,
-    marginBottom: 8,
-    color: '#374151',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#172B4D',
   },
   input: {
-    width: '100%',
     padding: '10px 12px',
-    fontSize: 14,
-    border: '1px solid #d1d5db',
-    borderRadius: 6,
+    fontSize: '14px',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
     outline: 'none',
     transition: 'border-color 0.2s ease',
-    boxSizing: 'border-box',
+    fontFamily: 'inherit',
   },
   textarea: {
-    width: '100%',
     padding: '10px 12px',
-    fontSize: 14,
-    border: '1px solid #d1d5db',
-    borderRadius: 6,
+    fontSize: '14px',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
     outline: 'none',
     transition: 'border-color 0.2s ease',
     resize: 'vertical',
     fontFamily: 'inherit',
-    boxSizing: 'border-box',
+    minHeight: '80px',
+  },
+  cancelButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#172B4D',
+    backgroundColor: '#F4F5F7',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+  },
+  confirmDeleteButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    backgroundColor: '#DE350B',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+  },
+  confirmUpdateButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    backgroundColor: '#0052CC',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+  },
+  disabledButton: {
+    opacity: '0.5',
+    cursor: 'not-allowed',
   },
 };
+
+// Add CSS animation for spinner
+const styleSheet = document.createElement('style');
+styleSheet.type = 'text/css';
+styleSheet.innerText = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(styleSheet);
 
 export default ProjectList;

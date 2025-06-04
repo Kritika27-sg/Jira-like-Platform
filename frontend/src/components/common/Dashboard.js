@@ -50,9 +50,7 @@ const Dashboard = () => {
             case 'Project Manager':
                 return [
                     { icon: '📋', label: 'Projects', path: '/projects', description: 'Manage your projects' },
-                    { icon: '✅', label: 'Tasks', path: '/my-tasks', description: 'View and assign tasks' },
-                    { icon: '📊', label: 'Reports', path: '/reports', description: 'Project analytics' },
-                    { icon: '⚙️', label: 'Settings', path: '/settings', description: 'Project settings' }
+                    { icon: '✅', label: 'Tasks', path: '/my-tasks', description: 'View and assign tasks' }
                 ];
             case 'Developer':
                 return [
@@ -152,28 +150,9 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    {/* Dashboard Content Area */}
+                    {/* Main content area - now empty without dashboard overview */}
                     <div style={styles.contentArea}>
-                        <div style={styles.summaryCard}>
-                            <h3 style={styles.cardTitle}>Dashboard Overview</h3>
-                            <p style={styles.cardText}>
-                                Use the navigation menu on the left to access your {user?.role.toLowerCase()} features and tools.
-                            </p>
-                            <div style={styles.statsGrid}>
-                                <div style={styles.statItem}>
-                                    <div style={styles.statNumber}>12</div>
-                                    <div style={styles.statLabel}>Active Projects</div>
-                                </div>
-                                <div style={styles.statItem}>
-                                    <div style={styles.statNumber}>8</div>
-                                    <div style={styles.statLabel}>Pending Tasks</div>
-                                </div>
-                                <div style={styles.statItem}>
-                                    <div style={styles.statNumber}>24</div>
-                                    <div style={styles.statLabel}>Completed</div>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Content area is now available for other components */}
                     </div>
                 </div>
             </div>
@@ -357,47 +336,6 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         gap: '24px',
-    },
-    summaryCard: {
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #DFE1E6',
-        borderRadius: '8px',
-        padding: '32px',
-        boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    },
-    cardTitle: {
-        fontSize: '20px',
-        fontWeight: '600',
-        color: '#172B4D',
-        margin: '0 0 12px 0',
-    },
-    cardText: {
-        fontSize: '14px',
-        color: '#6B778C',
-        lineHeight: '20px',
-        margin: '0 0 24px 0',
-    },
-    statsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '24px',
-    },
-    statItem: {
-        textAlign: 'center',
-        padding: '16px',
-        backgroundColor: '#F4F5F7',
-        borderRadius: '6px',
-    },
-    statNumber: {
-        fontSize: '24px',
-        fontWeight: '600',
-        color: '#172B4D',
-        marginBottom: '4px',
-    },
-    statLabel: {
-        fontSize: '12px',
-        color: '#6B778C',
-        fontWeight: '500',
     },
 };
 
