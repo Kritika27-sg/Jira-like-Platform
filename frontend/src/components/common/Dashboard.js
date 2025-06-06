@@ -50,7 +50,7 @@ const Dashboard = () => {
             case 'Project Manager':
                 return [
                     { icon: '📋', label: 'Projects', path: '/projects', description: 'Manage your projects' },
-                    { icon: '✅', label: 'Tasks', path: '/my-tasks', description: 'View and assign tasks' }
+                    { icon: '✅', label: 'Tasks', path: '/tasks', description: 'View and assign tasks' }
                 ];
             case 'Developer':
                 return [

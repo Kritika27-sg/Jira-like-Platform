@@ -153,21 +153,6 @@ const ProjectList = () => {
                   <p style={styles.projectDescription}>
                     {project.description || 'No description provided'}
                   </p>
-                  <div style={styles.projectFooter}>
-                    <div style={styles.projectStats}>
-                      <span style={styles.statItem}>
-                        <span style={styles.statIcon}>📋</span>
-                        12 Tasks
-                      </span>
-                      <span style={styles.statItem}>
-                        <span style={styles.statIcon}>👥</span>
-                        4 Members
-                      </span>
-                    </div>
-                    <Link to={`/projects/${project.id}`} style={styles.viewLink}>
-                      View →
-                    </Link>
-                  </div>
                 </div>
               ))}
             </div>

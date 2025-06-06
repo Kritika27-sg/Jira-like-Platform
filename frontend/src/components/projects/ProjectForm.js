@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const buttonColor = '#667eea'; 
-
 const ProjectForm = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -103,170 +101,346 @@ const ProjectForm = () => {
   };
 
   const handleBackClick = () => {
-    navigate('/dashboard'); // Or navigate to projects list: navigate('/projects')
+    navigate('/projects'); // Navigate back to projects list
   };
 
-  return (
-    <form onSubmit={handleSubmit} style={styles.form}>
-      <h2 style={styles.header}>Create Project</h2>
-
-      {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-      {successMsg && <p style={styles.success}>{successMsg}</p>}
-
-      <label style={styles.label}>
-        Project Name <span style={{ color: 'red' }}>*</span>
-      </label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        disabled={loading}
-        style={styles.input}
-        placeholder="Enter project name"
-        required
-        maxLength={255} 
-      />
-
-      <label style={styles.label}>Description</label>
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        disabled={loading}
-        style={styles.textarea}
-        placeholder="Enter project description (optional)"
-        maxLength={1000} 
-      />
-
-      <div style={styles.buttonContainer}>
-        <button 
-          type="submit" 
-          disabled={loading || !name.trim()} 
-          style={{
-            ...styles.submitButton,
-            ...(loading || !name.trim() ? styles.disabledButton : {})
-          }}
-        >
-          {loading ? 'Creating...' : 'Create'}
-        </button>
-        <button
-          type="button"
-          onClick={handleBackClick}
-          disabled={loading}
-          style={{
-            ...styles.backButton,
-            ...(loading ? styles.disabledButton : {})
-          }}
-        >
-          Back
-        </button>
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Creating project...</p>
+        </div>
       </div>
-    </form>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <button 
+            style={styles.backButton}
+            onClick={handleBackClick}
+            type="button"
+          >
+            ← Back to Projects
+          </button>
+          <div style={styles.titleSection}>
+            <h1 style={styles.pageTitle}>➕ Create New Project</h1>
+            <p style={styles.pageSubtitle}>
+              Set up a new project to organize your work
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        <div style={styles.formCard}>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            {/* Alert Messages */}
+            {errorMsg && (
+              <div style={styles.errorAlert}>
+                <span style={styles.alertIcon}>⚠️</span>
+                <span>{errorMsg}</span>
+              </div>
+            )}
+            
+            {successMsg && (
+              <div style={styles.successAlert}>
+                <span style={styles.alertIcon}>✅</span>
+                <span>{successMsg}</span>
+              </div>
+            )}
+
+            {/* Form Fields */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Project Name <span style={styles.required}>*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+                style={{
+                  ...styles.input,
+                  ...(name.trim() ? {} : styles.inputEmpty)
+                }}
+                placeholder="Enter project name"
+                required
+                maxLength={255}
+              />
+              <p style={styles.fieldHint}>
+                Choose a clear, descriptive name for your project
+              </p>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={loading}
+                style={styles.textarea}
+                placeholder="Enter project description (optional)"
+                maxLength={1000}
+                rows="4"
+              />
+              <p style={styles.fieldHint}>
+                Provide additional context about the project's goals and scope
+              </p>
+            </div>
+
+            {/* Form Actions */}
+            <div style={styles.formActions}>
+              <button
+                type="button"
+                onClick={handleBackClick}
+                disabled={loading}
+                style={{
+                  ...styles.cancelButton,
+                  ...(loading ? styles.disabledButton : {})
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={loading || !name.trim()} 
+                style={{
+                  ...styles.submitButton,
+                  ...(loading || !name.trim() ? styles.disabledButton : {})
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span style={styles.buttonSpinner}></span>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    ➕ Create Project
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
 const styles = {
-  form: {
-    maxWidth: 600,
-    margin: '40px auto',
-    padding: 30,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    display: 'flex',
-    flexDirection: 'column',
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#FAFBFC',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
   },
   header: {
-    fontSize: 26,
-    marginBottom: 25,
-    color: '#333',
-    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderBottom: '1px solid #DFE1E6',
+    padding: '24px 32px',
   },
-  label: {
-    fontWeight: '600',
-    fontSize: 16,
-    color: '#444',
-    marginBottom: 6,
-  },
-  input: {
-    fontSize: 16,
-    padding: '10px 12px',
-    borderRadius: 6,
-    border: '1px solid #ccc',
-    marginBottom: 20,
-    outline: 'none',
-    transition: 'border-color 0.3s ease',
-  },
-  textarea: {
-    fontSize: 16,
-    padding: '10px 12px',
-    borderRadius: 6,
-    border: '1px solid #ccc',
-    resize: 'vertical',
-    minHeight: 80,
-    marginBottom: 20,
-    outline: 'none',
-    transition: 'border-color 0.3s ease',
-    fontFamily: 'inherit',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  submitButton: {
-    backgroundColor: buttonColor,
-    color: '#fff',
-    padding: '12px 18px',
-    fontWeight: 600,
-    fontSize: 16,
-    border: 'none',
-    borderRadius: 8,
-    cursor: 'pointer',
-    boxShadow: `0 3px 8px ${buttonColor}99`,
-    transition: 'all 0.3s ease',
-    flex: 1,
-    marginRight: 10,
+  headerContent: {
+    maxWidth: '800px',
+    margin: '0 auto',
   },
   backButton: {
-    backgroundColor: '#6c757d',
-    color: '#fff',
-    padding: '12px 18px',
-    fontWeight: 600,
-    fontSize: 16,
-    border: 'none',
-    borderRadius: 8,
+    padding: '8px 16px',
+    backgroundColor: '#F4F5F7',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
     cursor: 'pointer',
-    boxShadow: '0 3px 8px rgba(108, 117, 125, 0.4)',
-    transition: 'all 0.3s ease',
-    flex: 1,
-    marginLeft: 10,
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#172B4D',
+    marginBottom: '16px',
+    transition: 'background-color 0.2s ease',
+  },
+  titleSection: {
+    marginBottom: '8px',
+  },
+  pageTitle: {
+    fontSize: '28px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 8px 0',
+    lineHeight: '32px',
+  },
+  pageSubtitle: {
+    fontSize: '16px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '24px',
+  },
+  mainContent: {
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '32px',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '400px',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '3px solid #DFE1E6',
+    borderTop: '3px solid #0052CC',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingText: {
+    fontSize: '16px',
+    color: '#6B778C',
+    marginTop: '16px',
+    margin: '16px 0 0 0',
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DFE1E6',
+    borderRadius: '8px',
+    padding: '32px',
+    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  errorAlert: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: '#FFEBE6',
+    border: '1px solid #FFBDAD',
+    borderRadius: '4px',
+    color: '#BF2600',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
+  successAlert: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: '#E3FCEF',
+    border: '1px solid #ABF5D1',
+    borderRadius: '4px',
+    color: '#00875A',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
+  alertIcon: {
+    fontSize: '16px',
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#172B4D',
+    lineHeight: '20px',
+  },
+  required: {
+    color: '#DE350B',
+  },
+  input: {
+    padding: '10px 12px',
+    fontSize: '14px',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+    fontFamily: 'inherit',
+    backgroundColor: '#FFFFFF',
+  },
+  inputEmpty: {
+    borderColor: '#DFE1E6',
+  },
+  textarea: {
+    padding: '10px 12px',
+    fontSize: '14px',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    minHeight: '80px',
+    backgroundColor: '#FFFFFF',
+  },
+  fieldHint: {
+    fontSize: '12px',
+    color: '#6B778C',
+    margin: '0',
+    lineHeight: '16px',
+  },
+  formActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    marginTop: '8px',
+  },
+  cancelButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#172B4D',
+    backgroundColor: '#F4F5F7',
+    border: '1px solid #DFE1E6',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+  },
+  submitButton: {
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    backgroundColor: '#0052CC',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   disabledButton: {
-    opacity: 0.6,
+    opacity: '0.5',
     cursor: 'not-allowed',
-    boxShadow: 'none',
   },
-  error: {
-    color: '#dc3545',
-    fontWeight: 600,
-    marginBottom: 15,
-    textAlign: 'center',
-    padding: '10px',
-    backgroundColor: '#f8d7da',
-    border: '1px solid #f5c6cb',
-    borderRadius: 6,
-  },
-  success: {
-    color: '#155724',
-    fontWeight: 600,
-    marginBottom: 15,
-    textAlign: 'center',
-    padding: '10px',
-    backgroundColor: '#d4edda',
-    border: '1px solid #c3e6cb',
-    borderRadius: 6,
+  buttonSpinner: {
+    width: '14px',
+    height: '14px',
+    border: '2px solid transparent',
+    borderTop: '2px solid #FFFFFF',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
   },
 };
+
+// Add CSS animation for spinner
+const styleSheet = document.createElement('style');
+styleSheet.type = 'text/css';
+styleSheet.innerText = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(styleSheet);
 
 export default ProjectForm;
