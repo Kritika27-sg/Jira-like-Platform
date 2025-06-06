@@ -55,14 +55,12 @@ const Dashboard = () => {
             case 'Developer':
                 return [
                     { icon: '💻', label: 'My Tasks', path: '/my-tasks', description: 'Tasks assigned to you' },
-                    { icon: '📋', label: 'Projects', path: '/projects', description: 'View project details' },
-                    { icon: '🔍', label: 'Search', path: '/search', description: 'Find tasks and issues' }
+                    { icon: '📋', label: 'Projects', path: '/projects', description: 'View project details' }
                 ];
             case 'Client':
                 return [
                     { icon: '📈', label: 'Progress', path: '/project-progress', description: 'Track project status' },
-                    { icon: '💬', label: 'Comments', path: '/comments', description: 'View and add feedback' },
-                    { icon: '📊', label: 'Reports', path: '/reports', description: 'Project reports' }
+                    { icon: '💬', label: 'Comments', path: '/comments', description: 'View and add feedback' }
                 ];
             default:
                 return [];
@@ -93,7 +91,7 @@ const Dashboard = () => {
                 <div style={styles.userInfo}>
                     <span style={styles.userName}>{user?.full_name}</span>
                     <button onClick={handleLogout} style={styles.logoutButton}>
-                        🚪 Sign Out
+                        Sign Out
                     </button>
                 </div>
             </div>
@@ -150,9 +148,157 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    {/* Main content area - now empty without dashboard overview */}
+                    {/* Enhanced Content Area with Visual Elements */}
                     <div style={styles.contentArea}>
-                        {/* Content area is now available for other components */}
+                        {/* Quick Stats Cards */}
+                        <div style={styles.statsGrid}>
+                            <div style={styles.statCard}>
+                                <div style={styles.statIcon}>
+                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                        <rect width="40" height="40" rx="8" fill="#E6F3FF"/>
+                                        <path d="M12 20h16M20 12v16" stroke="#0052CC" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                                <div style={styles.statContent}>
+                                    <p style={styles.statLabel}>Active Projects</p>
+                                </div>
+                            </div>
+
+                            <div style={styles.statCard}>
+                                <div style={styles.statIcon}>
+                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                        <rect width="40" height="40" rx="8" fill="#E8F5E8"/>
+                                        <path d="M12 20l4 4 8-8" stroke="#00875A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div style={styles.statContent}>
+                                    <p style={styles.statLabel}>Completed Tasks</p>
+                                </div>
+                            </div>
+
+                            <div style={styles.statCard}>
+                                <div style={styles.statIcon}>
+                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                        <rect width="40" height="40" rx="8" fill="#FFF4E6"/>
+                                        <circle cx="20" cy="20" r="8" stroke="#FF8B00" strokeWidth="2"/>
+                                        <path d="M20 16v4l2 2" stroke="#FF8B00" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                                <div style={styles.statContent}>
+                                    <p style={styles.statLabel}>In Progress</p>
+                                </div>
+                            </div>
+
+                            <div style={styles.statCard}>
+                                <div style={styles.statIcon}>
+                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                        <rect width="40" height="40" rx="8" fill="#F4F0FF"/>
+                                        <path d="M14 16h12M14 20h8M14 24h10" stroke="#8777D9" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                                <div style={styles.statContent}>
+                                    <p style={styles.statLabel}>Team Members</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hero Image Section */}
+                        <div style={styles.heroSection}>
+                            <div style={styles.heroContent}>
+                                <div style={styles.heroText}>
+                                    <h2 style={styles.heroTitle}>Boost Your Productivity</h2>
+                                    <p style={styles.heroDescription}>
+                                        Streamline your project management workflow with powerful tools 
+                                        designed to help teams collaborate effectively and deliver results.
+                                    </p>
+                                </div>
+                                <div style={styles.heroImage}>
+                                    <svg width="320" height="200" viewBox="0 0 320 200" fill="none">
+                                        {/* Background */}
+                                        <rect width="320" height="200" rx="12" fill="url(#heroGradient)"/>
+                                        
+                                        {/* Floating Elements */}
+                                        <circle cx="60" cy="40" r="20" fill="rgba(255,255,255,0.1)"/>
+                                        <circle cx="260" cy="160" r="15" fill="rgba(255,255,255,0.1)"/>
+                                        <circle cx="280" cy="50" r="12" fill="rgba(255,255,255,0.1)"/>
+                                        
+                                        {/* Main Dashboard Mockup */}
+                                        <rect x="40" y="60" width="240" height="120" rx="8" fill="rgba(255,255,255,0.9)"/>
+                                        <rect x="50" y="70" width="60" height="8" rx="4" fill="#0052CC"/>
+                                        <rect x="50" y="85" width="40" height="6" rx="3" fill="#DFE1E6"/>
+                                        <rect x="50" y="95" width="80" height="6" rx="3" fill="#DFE1E6"/>
+                                        
+                                        <rect x="150" y="70" width="120" height="40" rx="4" fill="#E6F3FF"/>
+                                        <rect x="160" y="80" width="20" height="20" rx="10" fill="#0052CC"/>
+                                        <rect x="190" y="82" width="60" height="4" rx="2" fill="#0052CC"/>
+                                        <rect x="190" y="90" width="40" height="4" rx="2" fill="#6B778C"/>
+                                        
+                                        <rect x="50" y="120" width="220" height="30" rx="4" fill="#F4F5F7"/>
+                                        <rect x="60" y="130" width="100" height="4" rx="2" fill="#00875A"/>
+                                        <rect x="60" y="138" width="60" height="4" rx="2" fill="#6B778C"/>
+                                        
+                                        <defs>
+                                            <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stopColor="#2684FF"/>
+                                                <stop offset="100%" stopColor="#0052CC"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Feature Cards */}
+                        <div style={styles.featuresGrid}>
+                            <div style={styles.featureCard}>
+                                <div style={styles.featureIcon}>
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                        <rect width="48" height="48" rx="12" fill="#E6F3FF"/>
+                                        <path d="M16 20h16v12a2 2 0 01-2 2H18a2 2 0 01-2-2V20zM20 16h8v4H20v-4z" fill="#0052CC"/>
+                                        <circle cx="20" cy="26" r="1.5" fill="white"/>
+                                        <circle cx="24" cy="26" r="1.5" fill="white"/>
+                                        <circle cx="28" cy="26" r="1.5" fill="white"/>
+                                    </svg>
+                                </div>
+                                <h3 style={styles.featureTitle}>Project Management</h3>
+                                <p style={styles.featureDescription}>
+                                    Organize and track your projects with intuitive boards, 
+                                    timelines, and progress indicators.
+                                </p>
+                            </div>
+
+                            <div style={styles.featureCard}>
+                                <div style={styles.featureIcon}>
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                        <rect width="48" height="48" rx="12" fill="#E8F5E8"/>
+                                        <path d="M18 24l4 4 8-8" stroke="#00875A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <rect x="14" y="16" width="20" height="16" rx="2" stroke="#00875A" strokeWidth="2" fill="none"/>
+                                    </svg>
+                                </div>
+                                <h3 style={styles.featureTitle}>Task Tracking</h3>
+                                <p style={styles.featureDescription}>
+                                    Create, assign, and monitor tasks with detailed 
+                                    status updates and deadline management.
+                                </p>
+                            </div>
+
+                            <div style={styles.featureCard}>
+                                <div style={styles.featureIcon}>
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                        <rect width="48" height="48" rx="12" fill="#F4F0FF"/>
+                                        <circle cx="20" cy="20" r="4" stroke="#8777D9" strokeWidth="2" fill="none"/>
+                                        <circle cx="28" cy="20" r="4" stroke="#8777D9" strokeWidth="2" fill="none"/>
+                                        <circle cx="24" cy="28" r="4" stroke="#8777D9" strokeWidth="2" fill="none"/>
+                                        <path d="M22.5 22.5l3 3M25.5 22.5l-3 3" stroke="#8777D9" strokeWidth="2"/>
+                                    </svg>
+                                </div>
+                                <h3 style={styles.featureTitle}>Team Collaboration</h3>
+                                <p style={styles.featureDescription}>
+                                    Connect with your team through comments, 
+                                    mentions, and real-time updates.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -210,9 +356,6 @@ const styles = {
         fontWeight: '500',
         color: '#172B4D',
         transition: 'background-color 0.2s ease',
-        ':hover': {
-            backgroundColor: '#EBECF0',
-        },
     },
     mainWrapper: {
         display: 'flex',
@@ -256,9 +399,6 @@ const styles = {
         padding: '4px',
         borderRadius: '2px',
         transition: 'background-color 0.2s ease',
-        ':hover': {
-            backgroundColor: '#F4F5F7',
-        },
     },
     roleInfoExpanded: {
         backgroundColor: '#F4F5F7',
@@ -299,9 +439,6 @@ const styles = {
         textAlign: 'left',
         marginBottom: '4px',
         transition: 'background-color 0.2s ease',
-        ':hover': {
-            backgroundColor: '#F4F5F7',
-        },
     },
     navIcon: {
         fontSize: '16px',
@@ -335,7 +472,115 @@ const styles = {
     contentArea: {
         display: 'flex',
         flexDirection: 'column',
+        gap: '32px',
+    },
+    // New styles for enhanced content
+    statsGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '24px',
+    },
+    statCard: {
+        backgroundColor: '#FFFFFF',
+        padding: '24px',
+        borderRadius: '8px',
+        border: '1px solid #DFE1E6',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: 'pointer',
+    },
+    statIcon: {
+        flexShrink: 0,
+    },
+    statContent: {
+        flex: 1,
+    },
+    statNumber: {
+        fontSize: '24px',
+        fontWeight: '700',
+        color: '#172B4D',
+        margin: '0 0 4px 0',
+        lineHeight: '1',
+    },
+    statLabel: {
+        fontSize: '14px',
+        color: '#6B778C',
+        margin: '0',
+    },
+    heroSection: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: '12px',
+        border: '1px solid #DFE1E6',
+        overflow: 'hidden',
+    },
+    heroContent: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '40px',
+        gap: '40px',
+    },
+    heroText: {
+        flex: 1,
+    },
+    heroTitle: {
+        fontSize: '32px',
+        fontWeight: '700',
+        color: '#172B4D',
+        margin: '0 0 16px 0',
+        lineHeight: '1.2',
+    },
+    heroDescription: {
+        fontSize: '16px',
+        color: '#6B778C',
+        margin: '0 0 24px 0',
+        lineHeight: '1.5',
+    },
+    heroButton: {
+        padding: '12px 24px',
+        backgroundColor: '#0052CC',
+        color: '#FFFFFF',
+        border: 'none',
+        borderRadius: '6px',
+        fontSize: '14px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease',
+    },
+    heroImage: {
+        flexShrink: 0,
+    },
+    featuresGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '24px',
+    },
+    featureCard: {
+        backgroundColor: '#FFFFFF',
+        padding: '32px 24px',
+        borderRadius: '8px',
+        border: '1px solid #DFE1E6',
+        textAlign: 'center',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: 'pointer',
+    },
+    featureIcon: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '20px',
+    },
+    featureTitle: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#172B4D',
+        margin: '0 0 12px 0',
+    },
+    featureDescription: {
+        fontSize: '14px',
+        color: '#6B778C',
+        margin: '0',
+        lineHeight: '1.5',
     },
 };
 
