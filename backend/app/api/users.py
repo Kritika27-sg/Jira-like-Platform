@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("/", response_model=List[UserSchema])
 def get_users(
     db: Session = Depends(get_db),
-    current_user: UserSchema = Depends(require_role(["Project Manager"])),
+    current_user: UserSchema = Depends(require_role(["Project Manager", "Developer"])),
 ):
     users = db.query(UserModel).all()
     return users
@@ -42,7 +42,7 @@ def create_user(
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: UserSchema = Depends(require_role(["Project Manager"])),
+    current_user: UserSchema = Depends(require_role(["Project Manager", "Developer"])),
 ):
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:

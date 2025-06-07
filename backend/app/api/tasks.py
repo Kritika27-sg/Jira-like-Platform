@@ -5,7 +5,7 @@ from typing import List
 from app.database import get_db
 from app.models.task import Task as TaskModel, TaskStatus
 from app.models.user import User
-from app.schemas.task import Task as TaskSchema, TaskCreate
+from app.schemas.task import Task as TaskSchema, TaskCreate, TaskUpdate
 from app.dependencies import get_current_user, require_role
 
 router = APIRouter()
@@ -90,6 +90,63 @@ def get_task(
         return task
 
     raise HTTPException(status_code=403, detail="Permission denied")
+
+
+@router.patch("/{task_id}", response_model=TaskSchema)
+def patch_task(
+    task_id: int,
+    task_update: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Partially update a task. Only provided fields will be updated.
+    Developers can only update status. Project Managers and Admins can update all fields.
+    """
+    task = db.query(TaskModel).filter(TaskModel.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Role-based update rights
+    if current_user.role == "Admin":
+        # Admin can update everything
+        pass
+    elif current_user.role == "Project Manager":
+        # Project Manager can only update tasks in their projects
+        if task.project.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not allowed to update tasks outside your projects")
+    elif current_user.role == "Developer":
+        # Developer can only update their assigned tasks and only certain fields
+        if task.assignee_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Can only update assigned tasks")
+        
+        # Developers can only update status and description for security
+        if task_update.title is not None or task_update.assignee_id is not None:
+            raise HTTPException(status_code=403, detail="Developers can only update status and description")
+    else:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    # Update only the fields that were provided
+    if task_update.title is not None:
+        task.title = task_update.title
+    
+    if task_update.description is not None:
+        task.description = task_update.description
+    
+    if task_update.status is not None:
+        task.status = task_update.status
+
+    # Only Admin and Project Manager can change assignee
+    if task_update.assignee_id is not None and current_user.role in ["Admin", "Project Manager"]:
+        if task_update.assignee_id:
+            assignee = db.query(User).filter(User.id == task_update.assignee_id).first()
+            if not assignee or assignee.role != "Developer":
+                raise HTTPException(status_code=400, detail="Tasks can be assigned only to Developers")
+        task.assignee_id = task_update.assignee_id
+
+    db.commit()
+    db.refresh(task)
+    return task
 
 
 @router.put("/{task_id}", response_model=TaskSchema)

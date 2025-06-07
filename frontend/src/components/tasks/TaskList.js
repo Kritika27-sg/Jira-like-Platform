@@ -5,11 +5,17 @@ import { Link } from 'react-router-dom';
 const TaskList = () => {
   //const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [updateForm, setUpdateForm] = useState({ title: '', description: '', status: '' });
+  const [updateForm, setUpdateForm] = useState({ 
+    title: '', 
+    description: '', 
+    status: '', 
+    assignee_id: '' 
+  });
 
   const fetchTasks = async () => {
     try {
@@ -23,6 +29,22 @@ const TaskList = () => {
       alert(error.message);
     }
     setLoading(false);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/users', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+    }
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -70,6 +92,11 @@ const TaskList = () => {
         project_id: selectedTask.project_id
       };
 
+      // Add assignee if selected
+      if (updateForm.assignee_id) {
+        updateData.assignee_id = parseInt(updateForm.assignee_id);
+      }
+
       console.log('Sending update data:', updateData); // Debug log
 
       const res = await fetch(`http://localhost:8000/tasks/${selectedTask.id}`, {
@@ -95,7 +122,7 @@ const TaskList = () => {
       
       setShowUpdateModal(false);
       setSelectedTask(null);
-      setUpdateForm({ title: '', description: '', status: '' });
+      setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
       alert('Task updated successfully!');
     } catch (error) {
       console.error('Update error:', error);
@@ -120,8 +147,21 @@ const TaskList = () => {
     setUpdateForm({
       title: task.title,
       description: task.description || '',
-      status: task.status
+      status: task.status,
+      assignee_id: task.assignee_id || ''
     });
+  };
+
+  // Filter users to show only developers
+  const developers = users.filter(user => 
+    user.role && user.role.toLowerCase() === 'developer'
+  );
+
+  // Get assignee name for display
+  const getAssigneeName = (assigneeId) => {
+    if (!assigneeId) return null;
+    const assignee = users.find(user => user.id === assigneeId);
+    return assignee ? (assignee.full_name || assignee.name || assignee.username) : 'Unknown User';
   };
 
   const getStatusColor = (status) => {
@@ -165,6 +205,7 @@ const TaskList = () => {
 
   useEffect(() => {
     fetchTasks();
+    fetchUsers();
   }, []);
 
   if (loading) {
@@ -242,14 +283,20 @@ const TaskList = () => {
                   <p style={styles.taskDescription}>
                     {task.description || 'No description provided'}
                   </p>
-                  {task.assignee && (
-                    <div style={styles.taskFooter}>
+                  <div style={styles.taskFooter}>
+                    {task.assignee_id && (
                       <span style={styles.statItem}>
                         <span style={styles.statIcon}>👤</span>
-                        {task.assignee}
+                        {getAssigneeName(task.assignee_id)}
                       </span>
-                    </div>
-                  )}
+                    )}
+                    {!task.assignee_id && (
+                      <span style={styles.statItem}>
+                        <span style={styles.statIcon}>👤</span>
+                        Unassigned
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -378,7 +425,8 @@ const TaskList = () => {
                         </div>
                       </div>
                       <p style={styles.taskOptionDesc}>
-                        {task.description || 'No description'}
+                        {task.description || 'No description'} 
+                        {task.assignee_id && ` • Assigned to: ${getAssigneeName(task.assignee_id)}`}
                       </p>
                     </div>
                   ))}
@@ -407,6 +455,32 @@ const TaskList = () => {
                     />
                   </div>
                   <div style={styles.formGroup}>
+                    <label style={styles.label}>
+                      <span style={styles.labelIcon}>👤</span>
+                      Assign to Developer
+                    </label>
+                    <select
+                      value={updateForm.assignee_id}
+                      onChange={(e) => setUpdateForm({...updateForm, assignee_id: e.target.value})}
+                      style={styles.select}
+                    >
+                      <option value="">Select a developer (optional)</option>
+                      {developers.length > 0 ? (
+                        developers.map(user => (
+                          <option key={user.id} value={user.id}>
+                            {user.full_name || user.name || user.username} 
+                            {user.email && ` (${user.email})`}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>No developers available</option>
+                      )}
+                    </select>
+                    <p style={styles.fieldHint}>
+                      Leave empty to unassign the task
+                    </p>
+                  </div>
+                  <div style={styles.formGroup}>
                     <label style={styles.label}>Status</label>
                     <select
                       value={updateForm.status}
@@ -427,7 +501,7 @@ const TaskList = () => {
                       onClick={() => {
                         setShowUpdateModal(false);
                         setSelectedTask(null);
-                        setUpdateForm({ title: '', description: '', status: '' });
+                        setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
                       }}
                     >
                       Cancel
@@ -450,7 +524,7 @@ const TaskList = () => {
                   onClick={() => {
                     setShowUpdateModal(false);
                     setSelectedTask(null);
-                    setUpdateForm({ title: '', description: '', status: '' });
+                    setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
                   }}
                 >
                   Cancel
@@ -823,6 +897,12 @@ const styles = {
     fontSize: '14px',
     fontWeight: '600',
     color: '#172B4D',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  labelIcon: {
+    fontSize: '16px',
   },
   input: {
     padding: '10px 12px',
