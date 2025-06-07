@@ -9,6 +9,7 @@ import ProjectList from './components/projects/ProjectList';
 import ProjectForm from './components/projects/ProjectForm';
 import TaskList from './components/tasks/TaskList';
 import TaskForm from './components/tasks/TaskForm';
+import Dev_Tasks from './components/tasks/Dev_Tasks';
 import UserList from './components/users/UserList';
 import UserForm from './components/users/UserForm';
 import CommentList from './components/comments/CommentList';
@@ -69,6 +70,14 @@ function App() {
             element={
               <PrivateRoute>
                 <TaskForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/my-tasks"
+            element={
+              <PrivateRoute>
+                <Dev_Tasks />
               </PrivateRoute>
             }
           />

@@ -54,8 +54,7 @@ const Dashboard = () => {
                 ];
             case 'Developer':
                 return [
-                    { icon: '💻', label: 'My Tasks', path: '/my-tasks', description: 'Tasks assigned to you' },
-                    { icon: '📋', label: 'Projects', path: '/projects', description: 'View project details' }
+                    { icon: '💻', label: 'My Tasks', path: '/my-tasks', description: 'Tasks assigned to you' }
                 ];
             case 'Client':
                 return [
