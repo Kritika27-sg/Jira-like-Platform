@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth, users, projects, tasks, comments, activity_log
 
-app = FastAPI(title="Jira-Like Platform Backend")
+app = FastAPI(title="Jira Backend")
 
 # Seting up CORS 
 app.add_middleware(

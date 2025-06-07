@@ -6,18 +6,43 @@ const TaskForm = () => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Todo');
   const [projectId, setProjectId] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
   const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
+    // Fetch projects
     fetch('http://localhost:8000/projects', {
       headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
     })
       .then(res => res.json())
       .then(data => setProjects(data))
       .catch(() => {});
+
+    // Fetch users/developers for assignment
+    fetch('http://localhost:8000/users', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
+    })
+      .then(res => {
+        console.log('Users response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Fetched users data:', data);
+        console.log('Is array:', Array.isArray(data));
+        console.log('Length:', data.length);
+        setUsers(data);
+      })
+      .catch(error => {
+        console.error('Error fetching users:', error);
+        setUsers([]); // Set empty array on error
+      });
   }, []);
 
   const handleSubmit = async (e) => {
@@ -29,18 +54,25 @@ const TaskForm = () => {
     
     setLoading(true);
     try {
+      const taskData = { 
+        title, 
+        description, 
+        status, 
+        project_id: parseInt(projectId)
+      };
+
+      // Add assignee if selected
+      if (assigneeId) {
+        taskData.assignee_id = parseInt(assigneeId);
+      }
+
       const res = await fetch('http://localhost:8000/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('jira-token')}`,
         },
-        body: JSON.stringify({ 
-          title, 
-          description, 
-          status, 
-          project_id: parseInt(projectId) 
-        }),
+        body: JSON.stringify(taskData),
       });
       
       if (!res.ok) throw new Error('Failed to create task');
@@ -64,6 +96,11 @@ const TaskForm = () => {
     navigate('/tasks');
   };
 
+  // Filter users to show only developers
+  const developers = users.filter(user => 
+    user.role && user.role.toLowerCase() === 'developer'
+  );
+
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -77,7 +114,7 @@ const TaskForm = () => {
           <div style={styles.titleSection}>
             <h1 style={styles.pageTitle}>➕ Create New Task</h1>
             <p style={styles.pageSubtitle}>
-              Add a new task to your project
+              Add a new task to your project and assign it to a team member
             </p>
           </div>
         </div>
@@ -146,6 +183,40 @@ const TaskForm = () => {
 
             <div style={styles.formGroup}>
               <label style={styles.label}>
+                <span style={styles.labelIcon}>👤</span>
+                Assign to Developer
+              </label>
+              
+              {/* Debug info - remove this after testing */}
+              <div style={{fontSize: '12px', color: '#666', marginBottom: '8px'}}>
+                Debug: Total users: {users.length}, Developers: {developers.length}
+              </div>
+              
+              <select
+                value={assigneeId}
+                onChange={e => setAssigneeId(e.target.value)}
+                disabled={loading}
+                style={styles.select}
+              >
+                <option value="">Select a developer (optional)</option>
+                {developers.length > 0 ? (
+                  developers.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name || user.name || user.username} 
+                      {user.email && ` (${user.email})`}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No developers available</option>
+                )}
+              </select>
+              <p style={styles.fieldHint}>
+                Leave empty if you want to assign this task later
+              </p>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
                 <span style={styles.labelIcon}>🏷️</span>
                 Status *
               </label>
@@ -197,6 +268,7 @@ const TaskForm = () => {
             <h3 style={styles.successTitle}>Task Created Successfully!</h3>
             <p style={styles.successMessage}>
               Your task has been created and added to the project.
+              {assigneeId && " The assigned developer will be notified."}
             </p>
             <p style={styles.redirectMessage}>
               Redirecting you back to the task list...
@@ -344,6 +416,12 @@ const styles = {
     fontFamily: 'inherit',
     backgroundColor: '#FFFFFF',
     boxSizing: 'border-box',
+  },
+  fieldHint: {
+    fontSize: '12px',
+    color: '#6B778C',
+    margin: '4px 0 0 0',
+    fontStyle: 'italic',
   },
   formActions: {
     display: 'flex',
