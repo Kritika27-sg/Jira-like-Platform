@@ -27,7 +27,7 @@ const Dashboard = () => {
                 info = "Developers can view and update tasks assigned to them.";
                 break;
             case 'Client':
-                info = "Clients can view project progress and comment on tasks but cannot modify any data.";
+                info = "Clients can view project progress and comment on tasks.";
                 break;
             default:
                 info = "Role information not available.";
