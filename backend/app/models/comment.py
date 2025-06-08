@@ -11,8 +11,8 @@ class Comment(Base):
     content = Column(String, nullable=False)
     created_at = Column(String, default=str(datetime.utcnow()), nullable=False)
 
-    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    task = relationship("Task", backref="comments")
+    project = relationship("Project", back_populates="comments")
     user = relationship("User")

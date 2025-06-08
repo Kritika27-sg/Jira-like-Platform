@@ -54,11 +54,12 @@ const Dashboard = () => {
                 ];
             case 'Developer':
                 return [
+                    { icon: '📋', label: 'Projects', path: '/projects', description: 'All available projects' },
                     { icon: '💻', label: 'My Tasks', path: '/my-tasks', description: 'Tasks assigned to you' }
                 ];
             case 'Client':
                 return [
-                    { icon: '📈', label: 'Progress', path: '/project-progress', description: 'Track project status' },
+                    { icon: '📈', label: 'Progress', path: '/activity-log', description: 'Track project status' },
                     { icon: '💬', label: 'Comments', path: '/comments', description: 'View and add feedback' }
                 ];
             default:

@@ -98,7 +98,7 @@ function App() {
             }
           />
           <Route
-            path="/tasks/:taskId/comments"
+            path="/comments"
             element={
               <PrivateRoute>
                 <CommentList />
@@ -106,7 +106,7 @@ function App() {
             }
           />
           <Route
-            path="/tasks/:taskId/activity-log"
+            path="/activity-log"
             element={
               <PrivateRoute>
                 <ActivityLogList />

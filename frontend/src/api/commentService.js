@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-export const getCommentsForTask = async (taskId, token) => {
-  const res = await fetch(`${API_BASE_URL}/comments/task/${taskId}`, {
+export const getCommentsForProject = async (projectId, token) => {
+  const res = await fetch(`${API_BASE_URL}/comments/project/${projectId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error('Failed to fetch comments');

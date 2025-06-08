@@ -5,13 +5,13 @@ from typing import List
 from app.database import get_db
 from app.models.comment import Comment
 from app.models.user import User
-from app.schemas.comment import Comment, CommentCreate
+from app.schemas.comment import Comment as CommentSchema, CommentCreate
 from app.dependencies import get_current_user, require_role
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Comment, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CommentSchema, status_code=status.HTTP_201_CREATED)
 def create_comment(
     comment_in: CommentCreate,
     db: Session = Depends(get_db),
@@ -19,7 +19,7 @@ def create_comment(
 ):
     comment = Comment(
         content=comment_in.content,
-        task_id=comment_in.task_id,
+        project_id=comment_in.project_id,
         user_id=current_user.id,
     )
     db.add(comment)
@@ -28,13 +28,13 @@ def create_comment(
     return comment
 
 
-@router.get("/task/{task_id}", response_model=List[Comment])
-def list_comments_for_task(
-    task_id: int,
+@router.get("/project/{project_id}", response_model=List[CommentSchema])
+def list_comments_for_project(
+    project_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    comments = db.query(Comment).filter(Comment.task_id == task_id).all()
+    comments = db.query(Comment).filter(Comment.project_id == project_id).all()
     return comments
 
 

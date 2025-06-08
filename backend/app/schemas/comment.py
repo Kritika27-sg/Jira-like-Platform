@@ -7,12 +7,12 @@ class CommentBase(BaseModel):
 
 
 class CommentCreate(CommentBase):
-    task_id: int
+    project_id: int
 
 
 class Comment(CommentBase):
     id: int
-    task_id: int
+    project_id: int
     user_id: int
 
     class Config:

@@ -303,11 +303,11 @@ const LoginPage = () => {
                 <div style={styles.featureList}>
                   <div style={styles.featureItem}>
                     <span style={styles.checkmark}>✓</span>
-                    <span>Real-time collaboration</span>
+                    <span>Efficient management of projects and tasks</span>
                   </div>
                   <div style={styles.featureItem}>
                     <span style={styles.checkmark}>✓</span>
-                    <span>Advanced project tracking</span>
+                    <span>Advanced task tracking</span>
                   </div>
                   <div style={styles.featureItem}>
                     <span style={styles.checkmark}>✓</span>
