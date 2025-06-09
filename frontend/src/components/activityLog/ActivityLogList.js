@@ -1,18 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const ProjectTaskActivityViewer = () => {
-  const [view, setView] = useState('projects'); // 'projects', 'tasks', 'activity'
+  const [view, setView] = useState('projects'); // 'projects', 'tasks'
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState(null);
-  const [projectTaskCounts, setProjectTaskCounts] = useState({}); // New state for task counts
+  const [projectTaskCounts, setProjectTaskCounts] = useState({});
 
   // Fetch task count for a specific project
   const fetchTaskCount = async (projectId) => {
@@ -77,25 +74,6 @@ const ProjectTaskActivityViewer = () => {
     setLoading(false);
   };
 
-  // Fetch activity logs for a task
-  const fetchActivityLogs = async (taskId) => {
-    setLoadingComments(true);
-    setError(null);
-    try {
-      const res = await fetch(`http://localhost:8000/activity-log/tasks/${taskId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
-      });
-      if (!res.ok) throw new Error('Failed to fetch activity logs');
-      const data = await res.json();
-      setLogs(data);
-    } catch (error) {
-      setError('Failed to load activity logs. Please try again.');
-      console.error('Error fetching activity logs:', error);
-      setLogs([]);
-    }
-    setLoadingComments(false);
-  };
-
   const fetchUsers = async () => {
     try {
       const res = await fetch('http://localhost:8000/users', {
@@ -117,28 +95,10 @@ const ProjectTaskActivityViewer = () => {
     fetchTasks(project.id);
   };
 
-  const handleTaskClick = (task) => {
-    setSelectedTask(task);
-    setView('activity');
-    fetchActivityLogs(task.id);
-  };
-
   const handleBackToProjects = () => {
     setView('projects');
     setSelectedProject(null);
-    setSelectedTask(null);
     setTasks([]);
-    setLogs([]);
-  };
-
-  const handleBackToTasks = () => {
-    setView('tasks');
-    setSelectedTask(null);
-    setLogs([]);
-  };
-
-  const handleBackToDashboard = () => {
-    window.history.back();
   };
 
   // Utility functions
@@ -146,59 +106,6 @@ const ProjectTaskActivityViewer = () => {
     if (!userId) return 'Unknown User';
     const user = users.find(user => user.id === userId);
     return user ? (user.full_name || user.name || user.username) : `User ${userId}`;
-  };
-
-  const getActionIcon = (action) => {
-    const actionLower = action?.toLowerCase();
-    if (actionLower?.includes('create')) return '➕';
-    if (actionLower?.includes('update')) return '✏️';
-    if (actionLower?.includes('delete')) return '🗑️';
-    if (actionLower?.includes('assign')) return '👤';
-    if (actionLower?.includes('comment')) return '💬';
-    if (actionLower?.includes('status')) return '🔄';
-    return '📝';
-  };
-
-  const getActionColor = (action) => {
-    const actionLower = action?.toLowerCase();
-    if (actionLower?.includes('create')) return { color: '#00875A', backgroundColor: '#E3FCEF' };
-    if (actionLower?.includes('update')) return { color: '#0052CC', backgroundColor: '#DEEBFF' };
-    if (actionLower?.includes('delete')) return { color: '#DE350B', backgroundColor: '#FFEBE6' };
-    if (actionLower?.includes('assign')) return { color: '#6554C0', backgroundColor: '#EAE6FF' };
-    if (actionLower?.includes('comment')) return { color: '#FF8B00', backgroundColor: '#FFF4E6' };
-    if (actionLower?.includes('status')) return { color: '#00A3BF', backgroundColor: '#E6FCFF' };
-    return { color: '#6B778C', backgroundColor: '#F4F5F7' };
-  };
-
-  const getRelativeTime = (timestamp) => {
-    const now = new Date();
-    const logTime = new Date(timestamp);
-    const diffInMs = now - logTime;
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    if (diffInDays > 0) {
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    } else if (diffInHours > 0) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-    } else {
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      if (diffInMinutes > 0) {
-        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-      } else {
-        return 'Just now';
-      }
-    }
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const getStatusColor = (status) => {
@@ -229,6 +136,41 @@ const ProjectTaskActivityViewer = () => {
     return { color: '#6B778C', backgroundColor: '#F4F5F7' };
   };
 
+  // Calculate completion percentage data for pie chart
+  const getCompletionData = () => {
+    const statusCounts = {};
+    tasks.forEach(task => {
+      const status = task.status || 'Unknown';
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    });
+
+    return Object.entries(statusCounts).map(([status, count]) => ({
+      name: status,
+      value: count,
+      percentage: Math.round((count / tasks.length) * 100)
+    }));
+  };
+
+  // Colors for pie chart
+  const COLORS = {
+    'Completed': '#00875A',
+    'Done': '#00875A',
+    'In Progress': '#0052CC',
+    'Active': '#0052CC',
+    'Pending': '#FF8B00',
+    'Todo': '#FF8B00',
+    'To Do': '#FF8B00',
+    'Unknown': '#6B778C'
+  };
+
+  const getColorForStatus = (status) => {
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('completed') || statusLower.includes('done')) return '#00875A';
+    if (statusLower.includes('progress') || statusLower.includes('active')) return '#0052CC';
+    if (statusLower.includes('pending') || statusLower.includes('todo')) return '#FF8B00';
+    return '#6B778C';
+  };
+
   useEffect(() => {
     fetchProjects();
     fetchUsers();
@@ -252,14 +194,12 @@ const ProjectTaskActivityViewer = () => {
       <div style={styles.container}>
         <div style={styles.header}>
           <div style={styles.headerContent}>
-            <Link to="/dashboard" style={styles.backLink}>
-              <button style={styles.backButton}>
-                ← Back to Dashboard
-              </button>
-            </Link>
+            <button style={styles.backButton} onClick={() => window.history.back()}>
+              ← Back to Dashboard
+            </button>
             <div style={styles.titleSection}>
               <h1 style={styles.pageTitle}>🏗️ Projects</h1>
-              <p style={styles.pageSubtitle}>Select a project to view its tasks and activities</p>
+              <p style={styles.pageSubtitle}>Select a project to view its tasks and completion status</p>
             </div>
           </div>
         </div>
@@ -269,7 +209,7 @@ const ProjectTaskActivityViewer = () => {
             <div style={styles.formHeader}>
               <h2 style={styles.formTitle}>📋 Select a Project</h2>
               <p style={styles.formSubtitle}>
-                Choose a project to view its tasks and activity logs
+                Choose a project to view its tasks and completion analytics
               </p>
             </div>
             
@@ -312,188 +252,127 @@ const ProjectTaskActivityViewer = () => {
     );
   }
 
-  // Tasks view
-  if (view === 'tasks') {
-    return (
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <div style={styles.headerContent}>
-            <button
-              style={styles.backButton}
-              onClick={handleBackToProjects}
-            >
-              ← Back to Projects
-            </button>
-            <div style={styles.titleSection}>
-              <h1 style={styles.pageTitle}>📋 Tasks - {selectedProject?.name}</h1>
-              <p style={styles.pageSubtitle}>Select a task to view its activity log</p>
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.mainContent}>
-          <div style={styles.formCard}>
-            <div style={styles.formHeader}>
-              <h2 style={styles.formTitle}>📋 Project Tasks</h2>
-              <p style={styles.formSubtitle}>
-                {selectedProject?.description || 'No description provided'}
-              </p>
-            </div>
-            
-            <div style={styles.cardContent}>
-              {!tasks.length ? (
-                <div style={styles.emptyState}>
-                  <div style={styles.emptyIcon}>📋</div>
-                  <p style={styles.emptyText}>No tasks found</p>
-                  <p style={styles.emptySubtext}>Tasks will appear here when they are created.</p>
-                </div>
-              ) : (
-                <div style={styles.projectGrid}>
-                  {tasks.map((task) => (
-                    <div
-                      key={task.id}
-                      style={styles.projectCard}
-                      onClick={() => handleTaskClick(task)}
-                    >
-                      <div style={styles.projectHeader}>
-                        <h4 style={styles.projectName}>{task.title}</h4>
-                        <div style={styles.taskBadges}>
-                          {task.status && (
-                            <span style={{...styles.taskBadge, ...getStatusColor(task.status)}}>
-                              {task.status}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <p style={styles.projectDescription}>
-                        {task.description || 'No description provided'}
-                      </p>
-                      <div style={styles.projectFooter}>
-                        <div style={styles.taskMeta}>
-                          {task.assignee && (
-                            <span style={styles.assignee}>
-                              👤 {getUserName(task.assignee_id)}
-                            </span>
-                          )}
-                          {task.priority && (
-                            <span style={{...styles.taskBadge, ...getPriorityColor(task.priority)}}>
-                              {task.priority}
-                            </span>
-                          )}
-                        </div>
-                        <span style={styles.selectText}>View Activity →</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Activity logs view
+  // Tasks view with pie chart
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div style={styles.headerContent}>
           <button
             style={styles.backButton}
-            onClick={handleBackToTasks}
+            onClick={handleBackToProjects}
           >
-            ← Back to Tasks
+            ← Back to Projects
           </button>
           <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>📋 Activity Log - {selectedTask?.title}</h1>
-            <p style={styles.pageSubtitle}>Task activity history and changes</p>
+            <h1 style={styles.pageTitle}>📋 Tasks - {selectedProject?.name}</h1>
+            <p style={styles.pageSubtitle}>Task overview and completion analytics</p>
           </div>
         </div>
       </div>
 
       <div style={styles.mainContent}>
-        <div style={styles.selectedProjectCard}>
-          <div style={styles.selectedProjectHeader}>
-            <button
-              style={styles.projectBackButton}
-              onClick={handleBackToTasks}
-            >
-              ← Back to Tasks
-            </button>
-            <div style={styles.selectedProjectInfo}>
-              <h3 style={styles.selectedProjectName}>{selectedTask?.title}</h3>
-              <p style={styles.selectedProjectDesc}>
-                {selectedTask?.description || 'No description provided'}
-              </p>
-            </div>
+        <div style={styles.formCard}>
+          <div style={styles.formHeader}>
+            <h2 style={styles.formTitle}>📊 Project Overview</h2>
+            <p style={styles.formSubtitle}>
+              {selectedProject?.description || 'No description provided'}
+            </p>
           </div>
-
-          <div style={styles.commentsSection}>
-            <div style={styles.commentsSectionHeader}>
-              <h4 style={styles.commentsTitle}>Activity Log ({logs.length})</h4>
-            </div>
-
-            {/* Loading Activity Logs */}
-            {loadingComments && (
-              <div style={styles.loadingContainer}>
-                <div style={styles.spinner}></div>
-                <span style={styles.loadingText}>Loading activity logs...</span>
+          
+          <div style={styles.cardContent}>
+            {!tasks.length ? (
+              <div style={styles.emptyState}>
+                <div style={styles.emptyIcon}>📋</div>
+                <p style={styles.emptyText}>No tasks found</p>
+                <p style={styles.emptySubtext}>Tasks will appear here when they are created.</p>
               </div>
-            )}
-
-            {/* Activity Logs List */}
-            {!loadingComments && (
-              <div style={styles.commentsContainer}>
-                {logs.length === 0 ? (
-                  <div style={styles.emptyState}>
-                    <div style={styles.emptyIcon}>📝</div>
-                    <p style={styles.emptyText}>No activity logs found</p>
-                    <p style={styles.emptySubtext}>Activity will appear here as changes are made to this task</p>
+            ) : (
+              <div style={styles.dashboardLayout}>
+                {/* Pie Chart Section */}
+                <div style={styles.chartSection}>
+                  <h3 style={styles.sectionTitle}>📊 Completion Status</h3>
+                  <div style={styles.chartContainer}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={getCompletionData()}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percentage }) => `${name}: ${percentage}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {getCompletionData().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={getColorForStatus(entry.name)} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value, name) => [value, name]} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                ) : (
-                  <div style={styles.commentsList}>
-                    {logs.map((log) => (
-                      <div key={log.id} style={styles.commentItem}>
-                        <div style={styles.commentHeader}>
-                          <div style={styles.commentAuthor}>
-                            <div style={styles.authorAvatar}>
-                              {getUserName(log.user_id).charAt(0).toUpperCase()}
-                            </div>
-                            <div style={styles.authorInfo}>
-                              <div style={styles.logHeaderInfo}>
-                                <span style={styles.authorName}>
-                                  {getUserName(log.user_id)}
-                                </span>
-                                <div 
-                                  style={{
-                                    ...styles.actionBadge,
-                                    ...getActionColor(log.action)
-                                  }}
-                                >
-                                  {getActionIcon(log.action)} {log.action}
-                                </div>
-                              </div>
-                              <div style={styles.logTimeInfo}>
-                                <span style={styles.relativeTime}>
-                                  {getRelativeTime(log.timestamp)}
-                                </span>
-                                <span style={styles.commentDate}>
-                                  {formatDate(log.timestamp)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
+                  
+                  {/* Summary Stats */}
+                  <div style={styles.statsGrid}>
+                    {getCompletionData().map((item, index) => (
+                      <div key={index} style={styles.statCard}>
+                        <div 
+                          style={{
+                            ...styles.statColor,
+                            backgroundColor: getColorForStatus(item.name)
+                          }}
+                        ></div>
+                        <div style={styles.statInfo}>
+                          <div style={styles.statValue}>{item.value}</div>
+                          <div style={styles.statLabel}>{item.name}</div>
                         </div>
-                        {log.details && (
-                          <div style={styles.commentContent}>
-                            {log.details}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
+
+                {/* Tasks List Section */}
+                <div style={styles.tasksSection}>
+                  <h3 style={styles.sectionTitle}>📋 All Tasks ({tasks.length})</h3>
+                  <div style={styles.tasksList}>
+                    {tasks.map((task) => (
+                      <div key={task.id} style={styles.taskItem}>
+                        <div style={styles.taskHeader}>
+                          <h4 style={styles.taskTitle}>{task.title}</h4>
+                          <div style={styles.taskBadges}>
+                            {task.status && (
+                              <span style={{...styles.taskBadge, ...getStatusColor(task.status)}}>
+                                {task.status}
+                              </span>
+                            )}
+                            {task.priority && (
+                              <span style={{...styles.taskBadge, ...getPriorityColor(task.priority)}}>
+                                {task.priority}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p style={styles.taskDescription}>
+                          {task.description || 'No description provided'}
+                        </p>
+                        <div style={styles.taskFooter}>
+                          {task.assignee_id && (
+                            <span style={styles.assignee}>
+                              👤 {getUserName(task.assignee_id)}
+                            </span>
+                          )}
+                          {task.due_date && (
+                            <span style={styles.dueDate}>
+                              📅 Due: {new Date(task.due_date).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -517,9 +396,6 @@ const styles = {
   headerContent: {
     maxWidth: '1200px',
     margin: '0 auto',
-  },
-  backLink: {
-    textDecoration: 'none',
   },
   backButton: {
     padding: '8px 16px',
@@ -658,84 +534,6 @@ const styles = {
     color: '#0052CC',
     fontWeight: '500',
   },
-  taskBadges: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-  },
-  taskBadge: {
-    fontSize: '10px',
-    fontWeight: '600',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    textTransform: 'uppercase',
-  },
-  taskMeta: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-  },
-  assignee: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  selectedProjectCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    overflow: 'hidden',
-  },
-  selectedProjectHeader: {
-    padding: '24px 32px',
-    borderBottom: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  projectBackButton: {
-    padding: '8px 12px',
-    fontSize: '14px',
-    color: '#0052CC',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  selectedProjectInfo: {
-    textAlign: 'center',
-  },
-  selectedProjectName: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  selectedProjectDesc: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-  },
-  commentsSection: {
-    backgroundColor: '#FFFFFF',
-  },
-  commentsSectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '24px 32px 16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-  },
-  commentsTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-  },
-  commentsContainer: {
-    maxHeight: '500px',
-    overflowY: 'auto',
-  },
   emptyState: {
     textAlign: 'center',
     padding: '40px 20px',
@@ -755,81 +553,125 @@ const styles = {
     color: '#6B778C',
     margin: '0',
   },
-  commentsList: {
-    padding: '0',
+  dashboardLayout: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '32px',
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
-  commentItem: {
-    padding: '16px 32px',
-    borderBottom: '1px solid #F4F5F7',
+  chartSection: {
+    backgroundColor: '#F4F5F7',
+    borderRadius: '8px',
+    padding: '24px',
   },
-  commentHeader: {
-    marginBottom: '8px',
+  tasksSection: {
+    backgroundColor: '#F4F5F7',
+    borderRadius: '8px',
+    padding: '24px',
+    maxHeight: '600px',
+    overflowY: 'auto',
   },
-  commentAuthor: {
-    display: 'flex',
-    alignItems: 'flex-start',
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 16px 0',
+  },
+  chartContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    padding: '16px',
+    marginBottom: '16px',
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
     gap: '12px',
   },
-  authorAvatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    backgroundColor: '#0052CC',
-    color: '#FFFFFF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '14px',
-    fontWeight: '600',
-    flexShrink: 0,
-  },
-  authorInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-  },
-  logHeaderInfo: {
+  statCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    padding: '12px',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '4px',
   },
-  authorName: {
-    fontSize: '14px',
+  statColor: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+  },
+  statInfo: {
+    flex: 1,
+  },
+  statValue: {
+    fontSize: '16px',
     fontWeight: '600',
     color: '#172B4D',
   },
-  actionBadge: {
+  statLabel: {
+    fontSize: '12px',
+    color: '#6B778C',
+  },
+  tasksList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  taskItem: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    padding: '16px',
+    border: '1px solid #DFE1E6',
+  },
+  taskHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '8px',
+  },
+  taskTitle: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0',
+    flex: 1,
+  },
+  taskBadges: {
+    display: 'flex',
+    gap: '4px',
+    alignItems: 'center',
+    marginLeft: '8px',
+  },
+  taskBadge: {
     fontSize: '10px',
     fontWeight: '600',
     padding: '4px 8px',
     borderRadius: '12px',
     textTransform: 'uppercase',
   },
-  logTimeInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  relativeTime: {
-    fontSize: '12px',
-    color: '#0052CC',
-    fontWeight: '500',
-  },
-  commentDate: {
+  taskDescription: {
     fontSize: '12px',
     color: '#6B778C',
+    lineHeight: '16px',
+    margin: '0 0 8px 0',
   },
-  commentContent: {
-    fontSize: '14px',
-    color: '#172B4D',
-    lineHeight: '20px',
-    marginLeft: '44px',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: '#F4F5F7',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    marginTop: '8px',
+  taskFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '11px',
+    color: '#6B778C',
+  },
+  assignee: {
+    fontSize: '11px',
+    color: '#6B778C',
+  },
+  dueDate: {
+    fontSize: '11px',
+    color: '#6B778C',
   },
 };
 
@@ -847,6 +689,12 @@ if (typeof document !== 'undefined') {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(9, 30, 66, 0.15);
       border-color: #0052CC;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboardLayout {
+        grid-template-columns: 1fr !important;
+      }
     }
   `;
   document.head.appendChild(styleSheet);
