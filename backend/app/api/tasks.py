@@ -91,7 +91,6 @@ def get_task(
 
     raise HTTPException(status_code=403, detail="Permission denied")
 
-
 @router.patch("/{task_id}", response_model=TaskSchema)
 def patch_task(
     task_id: int,

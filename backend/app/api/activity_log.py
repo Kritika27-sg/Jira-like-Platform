@@ -8,9 +8,8 @@ from app.schemas.activity_log import ActivityLog as ActivityLogSchema
 from app.dependencies import get_current_user
 
 router = APIRouter()
-
-
-@router.get("/task/{task_id}", response_model=List[ActivityLogSchema])
+    
+@router.get("/tasks/{task_id}", response_model=List[ActivityLogSchema])
 def get_activity_logs_for_task(
     task_id: int,
     db: Session = Depends(get_db),

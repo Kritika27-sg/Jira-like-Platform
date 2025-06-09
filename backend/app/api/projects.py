@@ -6,6 +6,8 @@ from app.models.project import Project
 from app.schemas.project import Project as ProjectSchema, ProjectCreate
 from app.dependencies import get_current_user, require_role
 from app.models.user import User
+from app.models.task import Task as TaskModel
+from app.schemas.task import Task as TaskSchema
 
 router = APIRouter()
 
@@ -73,6 +75,19 @@ def get_project(
         return project
     
     raise HTTPException(status_code=403, detail="Permission denied")
+
+@router.get("/{project_id}/tasks", response_model=List[TaskSchema])
+def get_tasks_for_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    """Get all tasks for a specific project"""
+    tasks = db.query(TaskModel).filter(TaskModel.project_id == project_id).all()
+    if not tasks:
+        # Return empty list instead of 404 if no tasks found
+        return []
+    return tasks    
 
 @router.put("/{project_id}", response_model=ProjectSchema)
 def update_project(
