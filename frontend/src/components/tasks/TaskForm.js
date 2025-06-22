@@ -27,20 +27,15 @@ const TaskForm = () => {
       headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
     })
       .then(res => {
-        console.log('Users response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
       })
       .then(data => {
-        console.log('Fetched users data:', data);
-        console.log('Is array:', Array.isArray(data));
-        console.log('Length:', data.length);
         setUsers(data);
       })
       .catch(error => {
-        console.error('Error fetching users:', error);
         setUsers([]); // Set empty array on error
       });
   }, []);
@@ -187,11 +182,6 @@ const TaskForm = () => {
                 Assign to Developer
               </label>
               
-              {/* Debug info - remove this after testing */}
-              <div style={{fontSize: '12px', color: '#666', marginBottom: '8px'}}>
-                Debug: Total users: {users.length}, Developers: {developers.length}
-              </div>
-              
               <select
                 value={assigneeId}
                 onChange={e => setAssigneeId(e.target.value)}
@@ -210,9 +200,6 @@ const TaskForm = () => {
                   <option disabled>No developers available</option>
                 )}
               </select>
-              <p style={styles.fieldHint}>
-                Leave empty if you want to assign this task later
-              </p>
             </div>
 
             <div style={styles.formGroup}>

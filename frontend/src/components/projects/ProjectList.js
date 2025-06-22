@@ -117,7 +117,7 @@ const ProjectList = () => {
           <div style={styles.titleSection}>
             <h1 style={styles.pageTitle}>📋 Projects</h1>
             <p style={styles.pageSubtitle}>
-              Manage and view your projects
+              Manage and view projects
             </p>
           </div>
         </div>

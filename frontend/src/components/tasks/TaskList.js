@@ -6,6 +6,7 @@ const TaskList = () => {
   //const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -28,7 +29,6 @@ const TaskList = () => {
     } catch (error) {
       alert(error.message);
     }
-    setLoading(false);
   };
 
   const fetchUsers = async () => {
@@ -44,6 +44,22 @@ const TaskList = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
       setUsers([]);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/projects', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('jira-token')}` },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      setProjects(data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setProjects([]);
     }
   };
 
@@ -164,6 +180,13 @@ const TaskList = () => {
     return assignee ? (assignee.full_name || assignee.name || assignee.username) : 'Unknown User';
   };
 
+  // Get project name for display
+  const getProjectName = (projectId) => {
+    if (!projectId) return 'No Project';
+    const project = projects.find(project => project.id === projectId);
+    return project ? project.name : 'Unknown Project';
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'to do':
@@ -204,8 +227,17 @@ const TaskList = () => {
   };
 
   useEffect(() => {
-    fetchTasks();
-    fetchUsers();
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchTasks(),
+        fetchUsers(),
+        fetchProjects()
+      ]);
+      setLoading(false);
+    };
+    
+    fetchAllData();
   }, []);
 
   if (loading) {
@@ -284,18 +316,26 @@ const TaskList = () => {
                     {task.description || 'No description provided'}
                   </p>
                   <div style={styles.taskFooter}>
-                    {task.assignee_id && (
+                    <div style={styles.taskFooterRow}>
                       <span style={styles.statItem}>
-                        <span style={styles.statIcon}>👤</span>
-                        {getAssigneeName(task.assignee_id)}
+                        <span style={styles.statIcon}>📁</span>
+                        {getProjectName(task.project_id)}
                       </span>
-                    )}
-                    {!task.assignee_id && (
-                      <span style={styles.statItem}>
-                        <span style={styles.statIcon}>👤</span>
-                        Unassigned
-                      </span>
-                    )}
+                    </div>
+                    <div style={styles.taskFooterRow}>
+                      {task.assignee_id && (
+                        <span style={styles.statItem}>
+                          <span style={styles.statIcon}>👤</span>
+                          {getAssigneeName(task.assignee_id)}
+                        </span>
+                      )}
+                      {!task.assignee_id && (
+                        <span style={styles.statItem}>
+                          <span style={styles.statIcon}>👤</span>
+                          Unassigned
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -358,7 +398,7 @@ const TaskList = () => {
                       </div>
                     </div>
                     <p style={styles.taskOptionDesc}>
-                      {task.description || 'No description'}
+                      {task.description || 'No description'} • Project: {getProjectName(task.project_id)}
                     </p>
                   </div>
                 ))}
@@ -425,7 +465,7 @@ const TaskList = () => {
                         </div>
                       </div>
                       <p style={styles.taskOptionDesc}>
-                        {task.description || 'No description'} 
+                        {task.description || 'No description'} • Project: {getProjectName(task.project_id)}
                         {task.assignee_id && ` • Assigned to: ${getAssigneeName(task.assignee_id)}`}
                       </p>
                     </div>
@@ -701,6 +741,11 @@ const styles = {
     minHeight: '40px',
   },
   taskFooter: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  taskFooterRow: {
     display: 'flex',
     alignItems: 'center',
   },

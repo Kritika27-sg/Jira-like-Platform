@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
       
       return data;
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     }
   };
@@ -89,7 +88,6 @@ export const AuthProvider = ({ children }) => {
       
       return data;
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     }
   };
@@ -121,7 +119,6 @@ export const AuthProvider = ({ children }) => {
       
       return data;
     } catch (error) {
-      console.error('Google auth error:', error);
       throw error;
     }
   };
@@ -151,9 +148,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // You can add a token validation endpoint to your FastAPI backend
-      // For now, we'll just check if the token exists and is not expired
-      // You might want to decode the JWT and check expiration
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Date.now() / 1000;
       
@@ -164,7 +158,6 @@ export const AuthProvider = ({ children }) => {
       
       return true;
     } catch (error) {
-      console.error('Token validation error:', error);
       logout();
       return false;
     }
