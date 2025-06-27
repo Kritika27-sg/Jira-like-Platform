@@ -149,6 +149,7 @@ const LoginPage = () => {
       <GoogleOAuthProvider clientId={clientId}>
         <div style={styles.container}>
           {/* Animated Background */}
+          <div style={styles.backgroundImage}></div>
           <div style={styles.backgroundAnimation}>
             <div style={styles.floatingShape1}></div>
             <div style={styles.floatingShape2}></div>
@@ -498,13 +499,31 @@ const LoginPage = () => {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7))',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
   },
+
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundImage: 'url("https://png.pngtree.com/thumb_back/fh260/background/20220427/pngtree-project-management-banner-delivery-business-image_1091566.jpg")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    opacity: 0.3, // Adjust opacity for overlay effect
+    zIndex: 0,
+  },
+
   backgroundAnimation: {
     position: 'absolute',
     top: 0,
