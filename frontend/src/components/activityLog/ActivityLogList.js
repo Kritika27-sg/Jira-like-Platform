@@ -198,8 +198,8 @@ const ProjectTaskActivityViewer = () => {
               ← Back to Dashboard
             </button>
             <div style={styles.titleSection}>
-              <h1 style={styles.pageTitle}>🏗️ Projects</h1>
-              <p style={styles.pageSubtitle}>Select a project to view its tasks and completion status</p>
+              <h1 style={styles.pageTitle}>Projects</h1>
+              <p style={styles.pageSubtitle}>Select a project to view its tasks and progress</p>
             </div>
           </div>
         </div>
@@ -208,9 +208,6 @@ const ProjectTaskActivityViewer = () => {
           <div style={styles.formCard}>
             <div style={styles.formHeader}>
               <h2 style={styles.formTitle}>📋 Select a Project</h2>
-              <p style={styles.formSubtitle}>
-                Choose a project to view its tasks and completion analytics
-              </p>
             </div>
             
             <div style={styles.cardContent}>
@@ -239,7 +236,7 @@ const ProjectTaskActivityViewer = () => {
                         <span style={styles.taskCount}>
                           {projectTaskCounts[project.id] || 0} tasks
                         </span>
-                        <span style={styles.selectText}>View Tasks →</span>
+                        <span style={styles.selectText}>View Progress →</span>
                       </div>
                     </div>
                   ))}

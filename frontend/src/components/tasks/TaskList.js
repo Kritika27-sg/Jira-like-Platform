@@ -287,6 +287,24 @@ const TaskList = () => {
           </div>
         ) : (
           <>
+            {/* Action Buttons - Now above task cards */}
+            <div style={styles.actionsCard}>
+              <h3 style={styles.actionsTitle}>Actions</h3>
+              <div style={styles.actionButtons}>
+                <Link to="/tasks/new" style={styles.linkButton}>
+                  <button style={styles.primaryButton}>
+                    ➕ Create New Task
+                  </button>
+                </Link>
+                <button style={styles.secondaryButton} onClick={openUpdateModal}>
+                  ✏️ Update Task
+                </button>
+                <button style={styles.dangerButton} onClick={openDeleteModal}>
+                  🗑️ Delete Task
+                </button>
+              </div>
+            </div>
+
             {/* Tasks Grid */}
             <div style={styles.tasksGrid}>
               {tasks.map((task) => (
@@ -339,24 +357,6 @@ const TaskList = () => {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div style={styles.actionsCard}>
-              <h3 style={styles.actionsTitle}>Task Actions</h3>
-              <div style={styles.actionButtons}>
-                <Link to="/tasks/new" style={styles.linkButton}>
-                  <button style={styles.primaryButton}>
-                    ➕ Create New Task
-                  </button>
-                </Link>
-                <button style={styles.secondaryButton} onClick={openUpdateModal}>
-                  ✏️ Update Task
-                </button>
-                <button style={styles.dangerButton} onClick={openDeleteModal}>
-                  🗑️ Delete Task
-                </button>
-              </div>
             </div>
           </>
         )}
@@ -677,7 +677,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
     gap: '24px',
-    marginBottom: '32px',
+    marginTop: '32px', // Added margin to separate from actions card above
   },
   taskCard: {
     backgroundColor: '#FFFFFF',
