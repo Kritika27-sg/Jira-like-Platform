@@ -157,7 +157,7 @@ const ProjectCommentSystem = () => {
                           {project.description || 'No description provided'}
                         </p>
                         <div style={styles.projectFooter}>
-                          <span style={styles.selectText}>Comment →</span>
+                          <span style={styles.selectText}>View Comment →</span>
                         </div>
                       </div>
                     ))}
