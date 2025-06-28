@@ -132,9 +132,6 @@ const ProjectCommentSystem = () => {
             <div style={styles.formCard}>
               <div style={styles.formHeader}>
                 <h2 style={styles.formTitle}>📋 Select a Project</h2>
-                <p style={styles.formSubtitle}>
-                  Choose a project to view and participate in discussions
-                </p>
               </div>
               
               <div style={styles.cardContent}>

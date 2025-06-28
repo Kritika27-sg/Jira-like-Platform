@@ -343,7 +343,7 @@ const LoginPage = () => {
           <div style={styles.rightSide}>
             <div style={styles.loginCard}>
               <div style={styles.welcomeIcon}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                <svg width="64" height="58" viewBox="0 0 24 30" fill="none">
                   <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" 
                         fill="rgba(83, 22, 180, 0.1)" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2"/>
                   <path d="M9 12l2 2 4-4" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2" 
@@ -519,7 +519,7 @@ const LoginPage = () => {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5))',
+    background: 'linear-gradient(rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.5))',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     display: 'flex',
     flexDirection: 'column',

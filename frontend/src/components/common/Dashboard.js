@@ -74,11 +74,11 @@ const Dashboard = () => {
             {/* Header */}
             <div style={styles.header}>
                 <div style={styles.logoContainer}>
-                    <svg width="32" height="32" viewBox="0 0 32 32" style={styles.logo}>
+                    <svg width="40" height="40" viewBox="0 0 32 32" style={styles.logo}>
                         <defs>
                             <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:1}} />
-                                <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:1}} />
+                                <stop offset="0%" style={{stopColor:"rgba(83, 22, 180, 0.93)",stopOpacity:1}} />
+                                <stop offset="100%" style={{stopColor:"rgba(65, 39, 161, 0.6)",stopOpacity:1}} />
                             </linearGradient>
                         </defs>
                         <rect width="32" height="32" rx="6" fill="url(#grad1)"/>
@@ -89,7 +89,6 @@ const Dashboard = () => {
                 </div>
 
                 <div style={styles.userInfo}>
-                    <span style={styles.userName}>{user?.full_name}</span>
                     <button onClick={handleLogout} style={styles.logoutButton}>
                         Sign Out
                     </button>
@@ -296,13 +295,13 @@ const styles = {
     },
     logoutButton: {
         padding: '8px 16px',
-        backgroundColor: '#F4F5F7',
+        backgroundColor: 'rgba(65, 39, 161, 0.9)',
         border: '1px solid #DFE1E6',
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '14px',
         fontWeight: '500',
-        color: '#172B4D',
+        color: '#FFFFFF',
         transition: 'background-color 0.2s ease',
     },
     mainWrapper: {

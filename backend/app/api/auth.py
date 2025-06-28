@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin 
 from app.dependencies import get_db
 import bcrypt
+import re
 from typing import Optional
 
 router = APIRouter()
@@ -32,6 +33,30 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 
+# Function to validate password strength
+def validate_password(password: str) -> tuple[bool, str]:
+    """
+    Validate password strength.
+    Requirements:
+    - At least 8 characters
+    - At least 1 number
+    - At least 1 special character
+    
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least 1 number"
+    
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least 1 special character (!@#$%^&*(),.?\":{}|<>)"
+    
+    return True, ""
+
+
 # Function to hash passwords
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -53,6 +78,14 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid role. Must be one of: {', '.join(VALID_ROLES)}"
+        )
+    
+    # Validate password strength
+    is_valid_password, password_error = validate_password(user_data.password)
+    if not is_valid_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=password_error
         )
     
     # Check if user with this email already exists
