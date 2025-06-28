@@ -161,8 +161,8 @@ const LoginPage = () => {
               <svg width="40" height="40" viewBox="0 0 32 32" style={styles.logo}>
                 <defs>
                   <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:1}} />
-                    <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:1}} />
+                    <stop offset="0%" style={{stopColor:"rgba(83, 22, 180, 0.93)",stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:"rgba(65, 39, 161, 0.6)",stopOpacity:1}} />
                   </linearGradient>
                 </defs>
                 <rect width="32" height="32" rx="8" fill="url(#grad1)"/>
@@ -174,54 +174,94 @@ const LoginPage = () => {
           </div>
 
           <div style={styles.mainContent}>
-            <div style={styles.loginCard}>
-              <div style={styles.roleSelectionIcon}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="8" r="3" stroke="#0052CC" strokeWidth="2" fill="#E3F2FD"/>
-                  <path d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" stroke="#0052CC" strokeWidth="2" fill="#E3F2FD"/>
-                </svg>
+            {/* Left Side - Illustration (same as main page) */}
+            <div style={styles.leftSide}>
+              <div style={styles.illustrationContainer}>
+                <div style={styles.teamIllustration}>
+                  <svg width="300" height="250" viewBox="0 0 300 250" style={styles.illustrationSvg}>
+                    {/* Team collaboration illustration */}
+                    <defs>
+                      <linearGradient id="teamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{stopColor:"rgba(83, 22, 180, 0.8)",stopOpacity:0.8}} />
+                        <stop offset="100%" style={{stopColor:"rgba(65, 39, 161, 0.6)",stopOpacity:0.9}} />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div style={styles.featureHighlight}>
+                  <h2 style={styles.featureTitle}>Collaborate Better</h2>
+                  <p style={styles.featureText}>
+                    Streamline your project management with powerful tools designed for modern teams.
+                  </p>
+                  <div style={styles.featureList}>
+                    <div style={styles.featureItem}>
+                      <span style={styles.checkmark}>✓</span>
+                      <span>Efficient management of projects and tasks</span>
+                    </div>
+                    <div style={styles.featureItem}>
+                      <span style={styles.checkmark}>✓</span>
+                      <span>Advanced task tracking</span>
+                    </div>
+                    <div style={styles.featureItem}>
+                      <span style={styles.checkmark}>✓</span>
+                      <span>Customizable workflows</span>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div style={styles.cardHeader}>
-                <h1 style={styles.title}>Select Your Role</h1>
-                <p style={styles.subtitle}>
-                  Please select your role to complete your Google sign-up.
-                </p>
-              </div>
-
-              <div style={styles.form}>
-                <div style={styles.inputGroup}>
-                  <label htmlFor="googleRole" style={styles.label}>
-                    Role *
-                  </label>
-                  <select
-                    id="googleRole"
-                    value={selectedGoogleRole}
-                    onChange={(e) => setSelectedGoogleRole(e.target.value)}
-                    style={styles.select}
-                    required
-                  >
-                    <option value="Client">Client</option>
-                    <option value="Project Manager">Project Manager</option>
-                    <option value="Developer">Developer</option>
-                  </select>
+            {/* Right Side - Role Selection Card (in same position as login card) */}
+            <div style={styles.rightSide}>
+              <div style={styles.loginCard}>
+                <div style={styles.roleSelectionIcon}>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="8" r="3" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2" fill="#E3F2FD"/>
+                    <path d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2" fill="#E3F2FD"/>
+                  </svg>
                 </div>
 
-                <div style={styles.buttonGroup}>
-                  <button 
-                    type="button" 
-                    onClick={handleGoogleSignupWithRole}
-                    style={styles.primaryButton}
-                  >
-                    Complete Sign Up
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={handleCancelGoogleSignup}
-                    style={styles.secondaryButton}
-                  >
-                    Cancel
-                  </button>
+                <div style={styles.cardHeader}>
+                  <h1 style={styles.title}>Select Your Role</h1>
+                  <p style={styles.subtitle}>
+                    Please select your role to complete your Google sign-up.
+                  </p>
+                </div>
+
+                <div style={styles.form}>
+                  <div style={styles.inputGroup}>
+                    <label htmlFor="googleRole" style={styles.label}>
+                      Role *
+                    </label>
+                    <select
+                      id="googleRole"
+                      value={selectedGoogleRole}
+                      onChange={(e) => setSelectedGoogleRole(e.target.value)}
+                      style={styles.select}
+                      required
+                    >
+                      <option value="Client">Client</option>
+                      <option value="Project Manager">Project Manager</option>
+                      <option value="Developer">Developer</option>
+                    </select>
+                  </div>
+
+                  <div style={styles.buttonGroup}>
+                    <button 
+                      type="button" 
+                      onClick={handleGoogleSignupWithRole}
+                      style={styles.primaryButton}
+                    >
+                      Complete Sign Up
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleCancelGoogleSignup}
+                      style={styles.secondaryButton}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -234,6 +274,7 @@ const LoginPage = () => {
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div style={styles.container}>
+        <div style={styles.backgroundImage}></div>
         {/* Animated Background */}
         <div style={styles.backgroundAnimation}>
           <div style={styles.floatingShape1}></div>
@@ -247,8 +288,8 @@ const LoginPage = () => {
             <svg width="40" height="40" viewBox="0 0 32 32" style={styles.logo}>
               <defs>
                 <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:1}} />
-                  <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:1}} />
+                  <stop offset="0%" style={{stopColor:"rgba(83, 22, 180, 0.93)",stopOpacity:1}} />
+                  <stop offset="100%" style={{stopColor:"rgba(65, 39, 161, 0.6)",stopOpacity:1}} />
                 </linearGradient>
               </defs>
               <rect width="32" height="32" rx="8" fill="url(#grad1)"/>
@@ -269,31 +310,10 @@ const LoginPage = () => {
                   {/* Team collaboration illustration */}
                   <defs>
                     <linearGradient id="teamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{stopColor:"#2684FF",stopOpacity:0.8}} />
-                      <stop offset="100%" style={{stopColor:"#0052CC",stopOpacity:0.9}} />
+                      <stop offset="0%" style={{stopColor:"rgba(83, 22, 180, 0.8)",stopOpacity:0.8}} />
+                      <stop offset="100%" style={{stopColor:"rgba(65, 39, 161, 0.6)",stopOpacity:0.9}} />
                     </linearGradient>
                   </defs>
-                  
-                  {/* People figures */}
-                  <circle cx="80" cy="80" r="25" fill="#E3F2FD" stroke="#2684FF" strokeWidth="2"/>
-                  <rect x="60" y="105" width="40" height="50" rx="20" fill="#E3F2FD" stroke="#2684FF" strokeWidth="2"/>
-                  
-                  <circle cx="150" cy="70" r="25" fill="#E8F5E8" stroke="#4CAF50" strokeWidth="2"/>
-                  <rect x="130" y="95" width="40" height="50" rx="20" fill="#E8F5E8" stroke="#4CAF50" strokeWidth="2"/>
-                  
-                  <circle cx="220" cy="85" r="25" fill="#FFF3E0" stroke="#FF9800" strokeWidth="2"/>
-                  <rect x="200" y="110" width="40" height="50" rx="20" fill="#FFF3E0" stroke="#FF9800" strokeWidth="2"/>
-                  
-                  {/* Connection lines */}
-                  <line x1="105" y1="90" x2="125" y2="85" stroke="#2684FF" strokeWidth="2" strokeDasharray="5,5"/>
-                  <line x1="175" y1="85" x2="195" y2="90" stroke="#2684FF" strokeWidth="2" strokeDasharray="5,5"/>
-                  
-                  {/* Kanban board representation */}
-                  <rect x="50" y="180" width="200" height="50" rx="8" fill="url(#teamGrad)" opacity="0.1"/>
-                  <rect x="60" y="190" width="30" height="30" rx="4" fill="#2684FF" opacity="0.7"/>
-                  <rect x="100" y="190" width="30" height="30" rx="4" fill="#4CAF50" opacity="0.7"/>
-                  <rect x="140" y="190" width="30" height="30" rx="4" fill="#FF9800" opacity="0.7"/>
-                  <rect x="180" y="190" width="30" height="30" rx="4" fill="#9C27B0" opacity="0.7"/>
                 </svg>
               </div>
               <div style={styles.featureHighlight}>
@@ -323,10 +343,10 @@ const LoginPage = () => {
           <div style={styles.rightSide}>
             <div style={styles.loginCard}>
               <div style={styles.welcomeIcon}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" 
-                        fill="#2684FF" opacity="0.1" stroke="#2684FF" strokeWidth="2"/>
-                  <path d="M9 12l2 2 4-4" stroke="#2684FF" strokeWidth="2" 
+                        fill="rgba(83, 22, 180, 0.1)" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2"/>
+                  <path d="M9 12l2 2 4-4" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2" 
                         strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
@@ -499,15 +519,13 @@ const LoginPage = () => {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7))',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
+    background: 'linear-gradient(rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5))',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
+    zIndex: 1,
   },
 
   backgroundImage: {
@@ -516,12 +534,12 @@ const styles = {
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundImage: 'url("https://png.pngtree.com/thumb_back/fh260/background/20220427/pngtree-project-management-banner-delivery-business-image_1091566.jpg")',
+    backgroundImage: 'url("https://ik.imagekit.io/kxva6i8j3/bg(4).jpg?updatedAt=1751076149986")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    opacity: 0.3, // Adjust opacity for overlay effect
-    zIndex: 0,
+    opacity: 0.7, 
+    zIndex: -1,
   },
 
   backgroundAnimation: {
@@ -578,7 +596,7 @@ const styles = {
   },
   logo: {
     borderRadius: '8px',
-    filter: 'drop-shadow(0 4px 12px rgba(38, 132, 255, 0.3))',
+    filter: 'drop-shadow(0 4px 12px rgba(83, 22, 180, 0.3))',
   },
   logoText: {
     fontSize: '24px',
@@ -605,7 +623,7 @@ const styles = {
     maxWidth: '500px',
   },
   teamIllustration: {
-    marginBottom: '40px',
+    marginBottom: '60px', // Increased from 40px to 60px to shift feature text down
     filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.1))',
   },
   illustrationSvg: {
@@ -720,11 +738,12 @@ const styles = {
   },
   activeTab: {
     color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    boxShadow: '0 2px 8px rgba(0, 82, 204, 0.3)',
+    background: 'linear-gradient(135deg,rgba(83, 22, 180, 0.93) 0%,rgba(65, 39, 161, 0.6) 100%)',
+    boxShadow: '0 2px 8px rgba(83, 22, 180, 0.3)',
   },
   inactiveTab: {
     color: '#6B778C',
+    backgroundColor: '#FFFFFF',
   },
   googleContainer: {
     marginBottom: '24px',
@@ -808,7 +827,7 @@ const styles = {
   primaryButton: {
     width: '100%',
     padding: '16px',
-    background: 'linear-gradient(135deg, #0052CC 0%, #2684FF 100%)',
+    background: 'linear-gradient(135deg,rgba(83, 22, 180, 0.93) 0%,rgba(65, 39, 161, 0.6) 100%)',
     color: '#FFFFFF',
     border: 'none',
     borderRadius: '12px',

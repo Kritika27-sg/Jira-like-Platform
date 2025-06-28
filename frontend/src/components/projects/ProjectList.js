@@ -142,25 +142,10 @@ const ProjectList = () => {
           </div>
         ) : (
           <>
-            {/* Projects Grid */}
-            <div style={styles.projectsGrid}>
-              {projects.map((project) => (
-                <div key={project.id} style={styles.projectCard}>
-                  <div style={styles.projectHeader}>
-                    <h3 style={styles.projectName}>{project.name}</h3>
-                    <div style={styles.projectBadge}>Active</div>
-                  </div>
-                  <p style={styles.projectDescription}>
-                    {project.description || 'No description provided'}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
+            {/* Action Buttons - Now above projects */}
             {(user.role === 'Admin' || user.role === 'Project Manager') && (
               <div style={styles.actionsCard}>
-                <h3 style={styles.actionsTitle}>Project Actions</h3>
+                <h3 style={styles.actionsTitle}>Actions</h3>
                 <div style={styles.actionButtons}>
                   <Link to="/projects/new" style={styles.linkButton}>
                     <button style={styles.primaryButton}>
@@ -176,6 +161,21 @@ const ProjectList = () => {
                 </div>
               </div>
             )}
+
+            {/* Projects Grid */}
+            <div style={styles.projectsGrid}>
+              {projects.map((project) => (
+                <div key={project.id} style={styles.projectCard}>
+                  <div style={styles.projectHeader}>
+                    <h3 style={styles.projectName}>{project.name}</h3>
+                    <div style={styles.projectBadge}>Active</div>
+                  </div>
+                  <p style={styles.projectDescription}>
+                    {project.description || 'No description provided'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </>
         )}
       </div>
@@ -420,11 +420,29 @@ const styles = {
     color: '#6B778C',
     margin: '0 0 32px 0',
   },
+  actionsCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DFE1E6',
+    borderRadius: '8px',
+    padding: '24px',
+    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
+    marginBottom: '32px',
+  },
+  actionsTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#172B4D',
+    margin: '0 0 16px 0',
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '12px',
+    flexWrap: 'wrap',
+  },
   projectsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
     gap: '24px',
-    marginBottom: '32px',
   },
   projectCard: {
     backgroundColor: '#FFFFFF',
@@ -464,49 +482,6 @@ const styles = {
     lineHeight: '20px',
     margin: '0 0 16px 0',
     minHeight: '40px',
-  },
-  projectFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  projectStats: {
-    display: 'flex',
-    gap: '16px',
-  },
-  statItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  statIcon: {
-    fontSize: '14px',
-  },
-  viewLink: {
-    fontSize: '14px',
-    color: '#0052CC',
-    textDecoration: 'none',
-    fontWeight: '500',
-  },
-  actionsCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  actionsTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 16px 0',
-  },
-  actionButtons: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap',
   },
   linkButton: {
     textDecoration: 'none',

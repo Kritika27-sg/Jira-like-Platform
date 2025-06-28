@@ -150,58 +150,6 @@ const Dashboard = () => {
 
                     {/* Enhanced Content Area with Visual Elements */}
                     <div style={styles.contentArea}>
-                        {/* Quick Stats Cards */}
-                        <div style={styles.statsGrid}>
-                            <div style={styles.statCard}>
-                                <div style={styles.statIcon}>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                                        <rect width="40" height="40" rx="8" fill="#E6F3FF"/>
-                                        <path d="M12 20h16M20 12v16" stroke="#0052CC" strokeWidth="2" strokeLinecap="round"/>
-                                    </svg>
-                                </div>
-                                <div style={styles.statContent}>
-                                    <p style={styles.statLabel}>Active Projects</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.statCard}>
-                                <div style={styles.statIcon}>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                                        <rect width="40" height="40" rx="8" fill="#E8F5E8"/>
-                                        <path d="M12 20l4 4 8-8" stroke="#00875A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </div>
-                                <div style={styles.statContent}>
-                                    <p style={styles.statLabel}>Completed Tasks</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.statCard}>
-                                <div style={styles.statIcon}>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                                        <rect width="40" height="40" rx="8" fill="#FFF4E6"/>
-                                        <circle cx="20" cy="20" r="8" stroke="#FF8B00" strokeWidth="2"/>
-                                        <path d="M20 16v4l2 2" stroke="#FF8B00" strokeWidth="2" strokeLinecap="round"/>
-                                    </svg>
-                                </div>
-                                <div style={styles.statContent}>
-                                    <p style={styles.statLabel}>In Progress</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.statCard}>
-                                <div style={styles.statIcon}>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                                        <rect width="40" height="40" rx="8" fill="#F4F0FF"/>
-                                        <path d="M14 16h12M14 20h8M14 24h10" stroke="#8777D9" strokeWidth="2" strokeLinecap="round"/>
-                                    </svg>
-                                </div>
-                                <div style={styles.statContent}>
-                                    <p style={styles.statLabel}>Team Members</p>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Hero Image Section */}
                         <div style={styles.heroSection}>
                             <div style={styles.heroContent}>
@@ -475,40 +423,6 @@ const styles = {
         gap: '32px',
     },
     // New styles for enhanced content
-    statsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '24px',
-    },
-    statCard: {
-        backgroundColor: '#FFFFFF',
-        padding: '24px',
-        borderRadius: '8px',
-        border: '1px solid #DFE1E6',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        cursor: 'pointer',
-    },
-    statIcon: {
-        flexShrink: 0,
-    },
-    statContent: {
-        flex: 1,
-    },
-    statNumber: {
-        fontSize: '24px',
-        fontWeight: '700',
-        color: '#172B4D',
-        margin: '0 0 4px 0',
-        lineHeight: '1',
-    },
-    statLabel: {
-        fontSize: '14px',
-        color: '#6B778C',
-        margin: '0',
-    },
     heroSection: {
         backgroundColor: '#FFFFFF',
         borderRadius: '12px',
