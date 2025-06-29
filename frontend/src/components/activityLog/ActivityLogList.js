@@ -229,7 +229,7 @@ const ProjectTaskActivityViewer = () => {
               </svg>
             </button>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              Project Activity Dashboard
+              Project Activity 
             </h1>
           </div>
         </header>

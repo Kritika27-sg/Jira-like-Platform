@@ -217,7 +217,7 @@ const Dashboard = () => {
                     {/* Welcome Section */}
                     <div className="mb-8">
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 bg-clip-text text-transparent mb-2">
-                            {getGreeting()}, {user?.full_name?.split(' ')[0]}! 👋
+                            {getGreeting()}, {user?.full_name?.split(' ')[0]}! 
                         </h1>
                         <p className="text-lg text-gray-600">Ready to tackle your {user?.role.toLowerCase()} tasks today?</p>
                     </div>
