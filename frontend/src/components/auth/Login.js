@@ -342,15 +342,6 @@ const LoginPage = () => {
           {/* Right Side - Login Form */}
           <div style={styles.rightSide}>
             <div style={styles.loginCard}>
-              <div style={styles.welcomeIcon}>
-                <svg width="64" height="58" viewBox="0 0 24 30" fill="none">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" 
-                        fill="rgba(83, 22, 180, 0.1)" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2"/>
-                  <path d="M9 12l2 2 4-4" stroke="rgba(83, 22, 180, 0.93)" strokeWidth="2" 
-                        strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-
               <div style={styles.cardHeader}>
                 <h1 style={styles.title}>
                   {isLogin ? 'Welcome Back!' : 'Join Our Team'}

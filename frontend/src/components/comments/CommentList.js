@@ -5,7 +5,6 @@ import { getCommentsForProject, createComment } from '../../api/commentService';
 
 const ProjectCommentSystem = () => {
   const { user } = useAuth();
-  //const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [comments, setComments] = useState([]);
@@ -96,72 +95,65 @@ const ProjectCommentSystem = () => {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <span style={styles.loadingText}>Loading projects...</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
+              Loading projects...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
       {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link to="/dashboard" style={styles.backLink}>
-            <button style={styles.backButton}>
-              ← Back to Dashboard
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <Link to="/dashboard">
+            <button className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group" title="Back to Dashboard">
+              <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
           </Link>
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>💬 Project Comments</h1>
-            <p style={styles.pageSubtitle}>
-              Select a project to view and add comments
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">💬 Project Comments</h1>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div style={styles.mainContent}>
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Step 1: Project Selection */}
         {!selectedProject && (
-          <div style={styles.projectSelection}>
-            <div style={styles.formCard}>
-              <div style={styles.formHeader}>
-                <h2 style={styles.formTitle}>📋 Select a Project</h2>
-              </div>
-              
-              <div style={styles.cardContent}>
+          <div className="space-y-8">
+            <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">📋 Select a Project</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.length === 0 ? (
-                  <div style={styles.emptyState}>
-                    <div style={styles.emptyIcon}>📋</div>
-                    <p style={styles.emptyText}>No projects available</p>
-                    <p style={styles.emptySubtext}>Contact your project manager for access.</p>
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-6">📋</div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">No projects available</h3>
+                    <p className="text-lg text-gray-600 mb-8">Contact your project manager for access.</p>
                   </div>
                 ) : (
-                  <div style={styles.projectGrid}>
-                    {projects.map((project) => (
-                      <div
-                        key={project.id}
-                        style={styles.projectCard}
-                        onClick={() => handleProjectSelect(project)}
-                      >
-                        <div style={styles.projectHeader}>
-                          <h4 style={styles.projectName}>{project.name}</h4>
-                          <div style={styles.projectBadge}>Active</div>
-                        </div>
-                        <p style={styles.projectDescription}>
-                          {project.description || 'No description provided'}
-                        </p>
-                        <div style={styles.projectFooter}>
-                          <span style={styles.selectText}>View Comment →</span>
+                  projects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="group backdrop-blur-sm bg-white/60 rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                      onClick={() => handleProjectSelect(project)}
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-900 transition-colors duration-200 line-clamp-2">{project.name}</h3>
+                        <div className="ml-4 flex-shrink-0">
+                          <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg">Active</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200 mb-4 line-clamp-3">{project.description || 'No description provided'}</p>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
@@ -170,574 +162,126 @@ const ProjectCommentSystem = () => {
 
         {/* Step 2: Selected Project View with Comments */}
         {selectedProject && (
-          <div style={styles.selectedProjectView}>
-            {/* Project Header with Back Button */}
-            <div style={styles.selectedProjectCard}>
-              <div style={styles.selectedProjectHeader}>
-                <button
-                  style={styles.projectBackButton}
-                  onClick={() => {
-                    setSelectedProject(null);
-                    setComments([]);
-                    setShowCommentForm(false);
-                    setNewComment('');
-                  }}
-                >
-                  ← Back to Projects
-                </button>
-                <div style={styles.selectedProjectInfo}>
-                  <h3 style={styles.selectedProjectName}>{selectedProject.name}</h3>
-                  <p style={styles.selectedProjectDesc}>
-                    {selectedProject.description || 'No description provided'}
-                  </p>
-                </div>
-              </div>
+          <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-8">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-2xl font-semibold text-gray-800">{selectedProject.name}</h3>
+              <button
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                onClick={() => {
+                  setSelectedProject(null);
+                  setComments([]);
+                  setShowCommentForm(false);
+                  setNewComment('');
+                }}
+              >
+                ← Back to Projects
+              </button>
+            </div>
+            <p className="text-gray-600 mb-4">{selectedProject.description || 'No description provided'}</p>
 
-              {/* Comments Section */}
-              <div style={styles.commentsSection}>
-                <div style={styles.commentsSectionHeader}>
-                  <h4 style={styles.commentsTitle}>Comments ({comments.length})</h4>
-                  {canComment && !showCommentForm && (
-                    <button
-                      style={styles.addCommentButton}
-                      onClick={() => setShowCommentForm(true)}
-                    >
-                      ➕ Add Comment
-                    </button>
+            {/* Comments Section */}
+            <div className="mt-6">
+              <h4 className="text-xl font-bold mb-4">Comments ({comments.length})</h4>
+              {canComment && !showCommentForm && (
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={() => setShowCommentForm(true)}
+                >
+                  ➕ Add Comment
+                </button>
+              )}
+
+              {/* Loading Comments */}
+              {loadingComments && (
+                <div className="flex items-center justify-center">
+                  <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+                  <span className="text-xl font-medium">Loading comments...</span>
+                </div>
+              )}
+
+              {/* Comments List */}
+              {!loadingComments && (
+                <div className="mt-4">
+                  {comments.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="text-6xl mb-6">💬</div>
+                      <p className="text-lg text-gray-600 mb-8">No comments yet</p>
+                      <p className="text-sm text-gray-500">Be the first to add a comment!</p>
+                    </div>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="border-b border-gray-200 py-4">
+                        <div className="flex items-center mb-2">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-semibold">
+                            {comment.user_name ? comment.user_name.charAt(0).toUpperCase() : 'U'}
+                          </div>
+                          <div className="ml-2">
+                            <span className="font-semibold">{comment.user_name || `User  ${comment.user_id}`}</span>
+                            {comment.created_at && (
+                              <span className="text-gray-500 text-sm ml-2">{formatDate(comment.created_at)}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-gray-700">{comment.content}</div>
+                      </div>
+                    ))
                   )}
                 </div>
+              )}
 
-                {/* Loading Comments */}
-                {loadingComments && (
-                  <div style={styles.loadingContainer}>
-                    <div style={styles.spinner}></div>
-                    <span style={styles.loadingText}>Loading comments...</span>
-                  </div>
-                )}
-
-                {/* Comments List */}
-                {!loadingComments && (
-                  <div style={styles.commentsContainer}>
-                    {comments.length === 0 ? (
-                      <div style={styles.emptyState}>
-                        <div style={styles.emptyIcon}>💬</div>
-                        <p style={styles.emptyText}>No comments yet</p>
-                        <p style={styles.emptySubtext}>Be the first to add a comment!</p>
-                      </div>
-                    ) : (
-                      <div style={styles.commentsList}>
-                        {comments.map((comment) => (
-                          <div key={comment.id} style={styles.commentItem}>
-                            <div style={styles.commentHeader}>
-                              <div style={styles.commentAuthor}>
-                                <div style={styles.authorAvatar}>
-                                  {comment.user_name ? comment.user_name.charAt(0).toUpperCase() : 'U'}
-                                </div>
-                                <div style={styles.authorInfo}>
-                                  <span style={styles.authorName}>
-                                    {comment.user_name || `User ${comment.user_id}`}
-                                  </span>
-                                  {comment.created_at && (
-                                    <span style={styles.commentDate}>
-                                      {formatDate(comment.created_at)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div style={styles.commentContent}>
-                              {comment.content}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Step 3: Comment Form (shown after clicking Add Comment) */}
-                {showCommentForm && canComment && (
-                  <div style={styles.commentFormContainer}>
-                    <div style={styles.commentFormHeader}>
-                      <h4 style={styles.commentFormTitle}>✍️ Add Your Comment</h4>
-                      <button
-                        style={styles.cancelCommentButton}
-                        onClick={() => {
-                          setShowCommentForm(false);
-                          setNewComment('');
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <form onSubmit={handleCommentSubmit} style={styles.commentForm}>
-                      <div style={styles.formGroup}>
-                        <textarea
-                          placeholder="Share your thoughts about this project..."
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
-                          rows={4}
-                          style={styles.textarea}
+              {/* Comment Form */}
+              {showCommentForm && canComment && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-bold mb-2">✍️ Add Your Comment</h4>
+                  <form onSubmit={handleCommentSubmit}>
+                    <textarea
+                      placeholder="Share your thoughts about this project..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      rows={4}
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      disabled={creating}
+                      autoFocus
+                    />
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-sm">{newComment.length}/1000</span>
+                      <div>
+                        <button
+                          type="button"
+                          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 mr-2"
+                          onClick={() => {
+                            setShowCommentForm(false);
+                            setNewComment('');
+                          }}
                           disabled={creating}
-                          autoFocus
-                        />
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className={`px-4 py-2 text-white rounded-lg ${creating || !newComment.trim() || newComment.length > 1000 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                          disabled={creating || !newComment.trim() || newComment.length > 1000}
+                        >
+                          {creating ? 'Posting...' : 'Post Comment'}
+                        </button>
                       </div>
-                      <div style={styles.formActions}>
-                        <span style={styles.characterCount}>
-                          {newComment.length}/1000
-                        </span>
-                        <div style={styles.formButtons}>
-                          <button
-                            type="button"
-                            style={styles.cancelButton}
-                            onClick={() => {
-                              setShowCommentForm(false);
-                              setNewComment('');
-                            }}
-                            disabled={creating}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={creating || !newComment.trim() || newComment.length > 1000}
-                            style={{
-                              ...styles.submitButton,
-                              ...(creating || !newComment.trim() || newComment.length > 1000 ? styles.disabledButton : {})
-                            }}
-                          >
-                            {creating ? 'Posting...' : 'Post Comment'}
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                )}
+                    </div>
+                  </form>
+                </div>
+              )}
 
-                {/* No Permission Message */}
-                {!canComment && (
-                  <div style={styles.noPermissionMessage}>
-                    <span style={styles.noPermissionText}>
-                      You don't have permission to comment on this project.
-                    </span>
-                  </div>
-                )}
-              </div>
+              {/* No Permission Message */}
+              {!canComment && (
+                <div className="mt-4 text-red-600">
+                  <span>You don't have permission to comment on this project.</span>
+                </div>
+              )}
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  backLink: {
-    textDecoration: 'none',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  titleSection: {
-    marginBottom: '8px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  mainContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '40px 20px',
-    gap: '12px',
-  },
-  spinner: {
-    width: '24px',
-    height: '24px',
-    border: '2px solid #DFE1E6',
-    borderTop: '2px solid #0052CC',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    fontSize: '14px',
-    color: '#6B778C',
-  },
-  projectSelection: {
-    width: '100%',
-  },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    overflow: 'hidden',
-  },
-  formHeader: {
-    padding: '24px 32px 16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  formTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  formSubtitle: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '20px',
-  },
-  cardContent: {
-    padding: '32px',
-  },
-  projectGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '20px',
-  },
-  projectCard: {
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '20px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  projectHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '12px',
-  },
-  projectName: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-  },
-  projectBadge: {
-    fontSize: '10px',
-    fontWeight: '600',
-    color: '#00875A',
-    backgroundColor: '#E3FCEF',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    textTransform: 'uppercase',
-  },
-  projectDescription: {
-    fontSize: '14px',
-    color: '#6B778C',
-    lineHeight: '20px',
-    margin: '0 0 16px 0',
-    minHeight: '40px',
-  },
-  projectFooter: {
-    textAlign: 'right',
-  },
-  selectText: {
-    fontSize: '12px',
-    color: '#0052CC',
-    fontWeight: '500',
-  },
-  selectedProjectView: {
-    width: '100%',
-  },
-  selectedProjectCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    overflow: 'hidden',
-  },
-  selectedProjectHeader: {
-    padding: '24px 32px',
-    borderBottom: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  projectBackButton: {
-    padding: '8px 12px',
-    fontSize: '14px',
-    color: '#0052CC',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  selectedProjectInfo: {
-    textAlign: 'center',
-  },
-  selectedProjectName: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  selectedProjectDesc: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-  },
-  commentsSection: {
-    backgroundColor: '#FFFFFF',
-  },
-  commentsSectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '24px 32px 16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-  },
-  commentsTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-  },
-  addCommentButton: {
-    padding: '8px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  commentsContainer: {
-    maxHeight: '500px',
-    overflowY: 'auto',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '40px 20px',
-  },
-  emptyIcon: {
-    fontSize: '32px',
-    marginBottom: '12px',
-  },
-  emptyText: {
-    fontSize: '16px',
-    fontWeight: '500',
-    color: '#172B4D',
-    margin: '0 0 4px 0',
-  },
-  emptySubtext: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-  },
-  commentsList: {
-    padding: '0',
-  },
-  commentItem: {
-    padding: '16px 32px',
-    borderBottom: '1px solid #F4F5F7',
-  },
-  commentHeader: {
-    marginBottom: '8px',
-  },
-  commentAuthor: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  authorAvatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    backgroundColor: '#0052CC',
-    color: '#FFFFFF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '14px',
-    fontWeight: '600',
-  },
-  authorInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  authorName: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-  },
-  commentDate: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  commentContent: {
-    fontSize: '14px',
-    color: '#172B4D',
-    lineHeight: '20px',
-    marginLeft: '40px',
-    whiteSpace: 'pre-wrap',
-  },
-  commentFormContainer: {
-    borderTop: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  commentFormHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-  },
-  commentFormTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-  },
-  cancelCommentButton: {
-    padding: '4px 8px',
-    fontSize: '16px',
-    color: '#6B778C',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'color 0.2s ease',
-  },
-  commentForm: {
-    padding: '32px',
-  },
-  formGroup: {
-    marginBottom: '16px',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px 16px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    backgroundColor: '#FFFFFF',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-    boxSizing: 'border-box',
-  },
-  formActions: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  characterCount: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  formButtons: {
-    display: 'flex',
-    gap: '12px',
-  },
-  cancelButton: {
-    padding: '12px 24px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  submitButton: {
-    padding: '12px 24px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  disabledButton: {
-    opacity: '0.6',
-    cursor: 'not-allowed',
-  },
-  noPermissionMessage: {
-    padding: '32px',
-    textAlign: 'center',
-    backgroundColor: '#F4F5F7',
-    borderTop: '1px solid #DFE1E6',
-  },
-  noPermissionText: {
-    fontSize: '14px',
-    color: '#6B778C',
-    fontStyle: 'italic',
-  },
-};
-
-// Add CSS animation for spinner
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.type = 'text/css';
-  styleSheet.innerText = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .projectCard:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(9, 30, 66, 0.15);
-      border-color: #0052CC;
-    }
-    
-    .textarea:focus {
-      border-color: #0052CC;
-      box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
 
 export default ProjectCommentSystem;

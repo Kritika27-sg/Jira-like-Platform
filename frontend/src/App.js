@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { Profiler } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Logout from './components/auth/Logout';
 import Dashboard from './components/common/Dashboard';
 import PrivateRoute from './components/common/PrivateRoute';
+import Profile from './components/common/Profile';
 import ProjectList from './components/projects/ProjectList';
 import ProjectForm from './components/projects/ProjectForm';
 import TaskList from './components/tasks/TaskList';
@@ -41,6 +42,15 @@ function App() {
             }
           />
           
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile/>
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/projects"
             element={

@@ -8,6 +8,16 @@ const Dev_Tasks = () => {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [filter, setFilter] = useState('all'); // all, to do, in progress, done
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse position for subtle parallax effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   useEffect(() => {
     fetchUserProfile();
@@ -91,7 +101,7 @@ const Dev_Tasks = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'to do':
         return '📋';
       case 'in progress':
@@ -104,41 +114,28 @@ const Dev_Tasks = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'to do':
-        return '#DFE1E6';
+        return 'from-gray-400 to-gray-500';
       case 'in progress':
-        return '#FFF4E6';
+        return 'from-blue-400 to-blue-500';
       case 'done':
-        return '#E3FCEF';
+        return 'from-green-400 to-emerald-500';
       default:
-        return '#DFE1E6';
+        return 'from-gray-400 to-gray-500';
     }
   };
 
-  const getStatusTextColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'to do':
-        return '#172B4D';
-      case 'in progress':
-        return '#FF8B00';
-      case 'done':
-        return '#00875A';
-      default:
-        return '#172B4D';
-    }
-  };
-
-  const getPriorityColor = (priority) => {
+  const getPriorityIcon = (priority) => {
     switch (priority?.toLowerCase()) {
       case 'high':
-        return '#DE350B';
+        return '🔴';
       case 'medium':
-        return '#FF8B00';
+        return '🟡';
       case 'low':
-        return '#00875A';
+        return '🟢';
       default:
-        return '#6B778C';
+        return '🔵';
     }
   };
 
@@ -168,496 +165,270 @@ const Dev_Tasks = () => {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Loading your tasks...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
+              Loading your tasks...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <div style={styles.navigationSection}>
-            <Link to="/dashboard" style={styles.backButton}>
-              ← Back to Dashboard
-            </Link>
-          </div>
-          
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>My Tasks</h1>
-            <p style={styles.pageSubtitle}>
-              Here are the tasks assigned to you.
-            </p>
-          </div>
-          
-          {/* Stats Cards */}
-          <div style={styles.statsContainer}>
-            <div style={styles.statCard}>
-              <div style={styles.statNumber}>{stats.total}</div>
-              <div style={styles.statLabel}>Total Tasks</div>
-            </div>
-            <div style={styles.statCard}>
-              <div style={styles.statNumber}>{stats.todo}</div>
-              <div style={styles.statLabel}>To Do</div>
-            </div>
-            <div style={styles.statCard}>
-              <div style={styles.statNumber}>{stats.inProgress}</div>
-              <div style={styles.statLabel}>In Progress</div>
-            </div>
-            <div style={styles.statCard}>
-              <div style={styles.statNumber}>{stats.done}</div>
-              <div style={styles.statLabel}>Completed</div>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+          }}
+        />
+        <div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+          }}
+        />
       </div>
 
+      {/* Header */}
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <Link 
+            to="/dashboard" 
+            className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+            title="Back to Dashboard"
+          >
+            <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              My Tasks
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage and track your assigned tasks
+            </p>
+          </div>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <div style={styles.mainContent}>
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {error && (
-          <div style={styles.errorMessage}>
-            <span style={styles.errorIcon}>⚠️</span>
-            {error}
-            <button style={styles.retryButton} onClick={fetchMyTasks}>
-              Retry
-            </button>
+          <div className="mb-8 backdrop-blur-sm bg-red-50/80 border border-red-200/50 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div className="flex-1">
+                <p className="text-red-800 font-medium">{error}</p>
+                <button 
+                  onClick={fetchMyTasks}
+                  className="mt-2 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="backdrop-blur-sm bg-white/60 rounded-2xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              {stats.total}
+            </div>
+            <div className="text-sm font-medium text-gray-600">Total Tasks</div>
+          </div>
+          <div className="backdrop-blur-sm bg-white/60 rounded-2xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="text-3xl font-bold bg-gradient-to-r from-gray-600 to-gray-500 bg-clip-text text-transparent mb-2">
+              {stats.todo}
+            </div>
+            <div className="text-sm font-medium text-gray-600">📋 To Do</div>
+          </div>
+          <div className="backdrop-blur-sm bg-white/60 rounded-2xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent mb-2">
+              {stats.inProgress}
+            </div>
+            <div className="text-sm font-medium text-gray-600">⚡ In Progress</div>
+          </div>
+          <div className="backdrop-blur-sm bg-white/60 rounded-2xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent mb-2">
+              {stats.done}
+            </div>
+            <div className="text-sm font-medium text-gray-600">✅ Completed</div>
+          </div>
+        </div>
+
         {/* Filter Tabs */}
-        <div style={styles.filterTabs}>
-          <button 
-            style={{
-              ...styles.filterTab,
-              ...(filter === 'all' ? styles.activeTab : {})
-            }}
-            onClick={() => setFilter('all')}
-          >
-            All Tasks ({stats.total})
-          </button>
-          <button 
-            style={{
-              ...styles.filterTab,
-              ...(filter === 'todo' ? styles.activeTab : {})
-            }}
-            onClick={() => setFilter('todo')}
-          >
-            📋 To Do ({stats.todo})
-          </button>
-          <button 
-            style={{
-              ...styles.filterTab,
-              ...(filter === 'inprogress' ? styles.activeTab : {})
-            }}
-            onClick={() => setFilter('inprogress')}
-          >
-            ⚡ In Progress ({stats.inProgress})
-          </button>
-          <button 
-            style={{
-              ...styles.filterTab,
-              ...(filter === 'done' ? styles.activeTab : {})
-            }}
-            onClick={() => setFilter('done')}
-          >
-            ✅ Done ({stats.done})
-          </button>
+        <div className="backdrop-blur-sm bg-white/60 rounded-2xl border border-white/30 shadow-lg p-2 mb-8">
+          <div className="flex flex-wrap gap-2">
+            <button 
+              onClick={() => setFilter('all')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                filter === 'all' 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/50'
+              }`}
+            >
+              All Tasks ({stats.total})
+            </button>
+            <button 
+              onClick={() => setFilter('todo')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                filter === 'todo' 
+                  ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/50'
+              }`}
+            >
+              📋 To Do ({stats.todo})
+            </button>
+            <button 
+              onClick={() => setFilter('inprogress')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                filter === 'inprogress' 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/50'
+              }`}
+            >
+              ⚡ In Progress ({stats.inProgress})
+            </button>
+            <button 
+              onClick={() => setFilter('done')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                filter === 'done' 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/50'
+              }`}
+            >
+              ✅ Done ({stats.done})
+            </button>
+          </div>
         </div>
 
         {/* Tasks List */}
         {filteredTasks.length === 0 ? (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>
-              {filter === 'all' ? '📋' : 
-               filter === 'todo' ? '📋' :
-               filter === 'inprogress' ? '⚡' : '✅'}
+          <div className="text-center py-16">
+            <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12 max-w-2xl mx-auto">
+              <div className="text-6xl mb-6">
+                {filter === 'all' ? '📋' : 
+                 filter === 'todo' ? '📋' :
+                 filter === 'inprogress' ? '⚡' : '✅'}
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                {filter === 'all' ? 'No tasks assigned yet' :
+                 filter === 'todo' ? 'No tasks to do' :
+                 filter === 'inprogress' ? 'No tasks in progress' :
+                 'No completed tasks'}
+              </h3>
+              <p className="text-lg text-gray-600">
+                {filter === 'all' 
+                  ? 'Tasks assigned to you by project managers will appear here.'
+                  : `You don't have any ${filter === 'todo' ? 'pending' : filter === 'inprogress' ? 'active' : 'completed'} tasks right now.`
+                }
+              </p>
             </div>
-            <h3 style={styles.emptyTitle}>
-              {filter === 'all' ? 'No tasks assigned yet' :
-               filter === 'todo' ? 'No tasks to do' :
-               filter === 'inprogress' ? 'No tasks in progress' :
-               'No completed tasks'}
-            </h3>
-            <p style={styles.emptyMessage}>
-              {filter === 'all' 
-                ? 'Tasks assigned to you by project managers will appear here.'
-                : `You don't have any ${filter === 'todo' ? 'pending' : filter === 'inprogress' ? 'active' : 'completed'} tasks right now.`
-              }
-            </p>
           </div>
         ) : (
-          <div style={styles.tasksList}>
-            {filteredTasks.map(task => (
-              <div key={task.id} style={styles.taskCard}>
-                <div style={styles.taskHeader}>
-                  <div style={styles.taskTitleSection}>
-                    <h3 style={styles.taskTitle}>{task.title}</h3>
-                    <div style={styles.taskMeta}>
-                      {task.project_id && (
-                        <span style={styles.projectName}>
-                          📁 {getProjectName(task.project_id)}
-                        </span>
-                      )}
-                      <span style={styles.taskId}>#{task.id}</span>
-                    </div>
-                  </div>
-                  
-                  <div style={styles.taskActions}>
-                    <div 
-                      style={{
-                        ...styles.statusBadge,
-                        backgroundColor: getStatusColor(task.status),
-                        color: getStatusTextColor(task.status)
-                      }}
-                    >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTasks.map((task, index) => (
+              <div 
+                key={task.id}
+                className="group backdrop-blur-sm bg-white/60 rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                style={{
+                  animationDelay: `${index * 0.1}s`
+                }}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-900 transition-colors duration-200 line-clamp-2">
+                    {task.title}
+                  </h3>
+                  <div className="ml-4 flex-shrink-0">
+                    <span className={`px-3 py-1 bg-gradient-to-r ${getStatusColor(task.status)} text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg`}>
                       {getStatusIcon(task.status)} {task.status}
-                    </div>
+                    </span>
                   </div>
                 </div>
-
+                
                 {task.description && (
-                  <div style={styles.taskDescription}>
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200 mb-4 line-clamp-3">
                     {task.description}
-                  </div>
+                  </p>
                 )}
 
-                <div style={styles.taskFooter}>
-                  <div style={styles.taskInfo}>
-                    {task.priority && (
-                      <span 
-                        style={{
-                          ...styles.priorityBadge,
-                          color: getPriorityColor(task.priority)
-                        }}
-                      >
-                        🔥 {task.priority}
+                <div className="space-y-3 mb-4">
+                  {/* Project Info */}
+                  {task.project_id && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">
+                        📁 {getProjectName(task.project_id)}
                       </span>
-                    )}
-                    {task.created_at && (
-                      <span style={styles.createdDate}>
-                        Created: {new Date(task.created_at).toLocaleDateString()}
+                    </div>
+                  )}
+
+                  {/* Priority and ID */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {task.priority && (
+                        <>
+                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                          <span className="text-sm text-gray-600">
+                            {getPriorityIcon(task.priority)} {task.priority}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold text-xs shadow-lg group-hover:scale-110 transition-transform duration-200">
+                      #{task.id}
+                    </div>
+                  </div>
+
+                  {/* Created Date */}
+                  {task.created_at && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">
+                        📅 {new Date(task.created_at).toLocaleDateString()}
                       </span>
-                    )}
-                  </div>
-                  
-                  <div style={styles.statusActions}>
-                    <select
-                      value={task.status}
-                      onChange={(e) => updateTaskStatus(task.id, e.target.value)}
-                      style={styles.statusSelect}
-                    >
-                      <option value="To Do">📋 To Do</option>
-                      <option value="In Progress">⚡ In Progress</option>
-                      <option value="Done">✅ Done</option>
-                    </select>
-                  </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Update Section */}
+                <div className="pt-4 border-t border-gray-200/50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Update Status:
+                  </label>
+                  <select
+                    value={task.status}
+                    onChange={(e) => updateTaskStatus(task.id, e.target.value)}
+                    className="w-full px-4 py-2 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm font-medium"
+                  >
+                    <option value="To Do">📋 To Do</option>
+                    <option value="In Progress">⚡ In Progress</option>
+                    <option value="Done">✅ Done</option>
+                  </select>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-  },
-  spinner: {
-    width: '40px',
-    height: '40px',
-    border: '4px solid #DFE1E6',
-    borderTop: '4px solid #0052CC',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '16px',
-  },
-  loadingText: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  navigationSection: {
-    marginBottom: '16px',
-  },
-  backButton: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '8px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#0052CC',
-    backgroundColor: 'transparent',
-    border: '1px solid #0052CC',
-    borderRadius: '4px',
-    textDecoration: 'none',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer',
-  },
-  titleSection: {
-    marginBottom: '24px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  statsContainer: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '16px',
-  },
-  statCard: {
-    backgroundColor: '#F4F5F7',
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    border: '1px solid #DFE1E6',
-  },
-  statNumber: {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: '#0052CC',
-    margin: '0 0 8px 0',
-  },
-  statLabel: {
-    fontSize: '14px',
-    color: '#6B778C',
-    fontWeight: '500',
-  },
-  mainContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  errorMessage: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    backgroundColor: '#FFEBE6',
-    border: '1px solid #FFBDAD',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '24px',
-    color: '#DE350B',
-  },
-  errorIcon: {
-    fontSize: '20px',
-  },
-  retryButton: {
-    padding: '6px 12px',
-    fontSize: '12px',
-    backgroundColor: '#DE350B',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginLeft: 'auto',
-  },
-  filterTabs: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '24px',
-    borderBottom: '1px solid #DFE1E6',
-    paddingBottom: '16px',
-  },
-  filterTab: {
-    padding: '8px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    backgroundColor: 'transparent',
-    border: '1px solid #DFE1E6',
-    borderRadius: '20px',
-    cursor: 'pointer',
-    color: '#6B778C',
-    transition: 'all 0.2s ease',
-  },
-  activeTab: {
-    backgroundColor: '#0052CC',
-    color: '#FFFFFF',
-    borderColor: '#0052CC',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    border: '1px solid #DFE1E6',
-  },
-  emptyIcon: {
-    fontSize: '64px',
-    marginBottom: '16px',
-  },
-  emptyTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  emptyMessage: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '20px',
-  },
-  tasksList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  taskCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    transition: 'box-shadow 0.2s ease',
-  },
-  taskHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '12px',
-  },
-  taskTitleSection: {
-    flex: 1,
-  },
-  taskTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '24px',
-  },
-  taskMeta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
-  projectName: {
-    fontSize: '14px',
-    color: '#0052CC',
-    fontWeight: '500',
-    backgroundColor: '#E6F3FF',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  taskId: {
-    fontSize: '12px',
-    color: '#6B778C',
-    backgroundColor: '#F4F5F7',
-    padding: '2px 8px',
-    borderRadius: '12px',
-  },
-  taskActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  statusBadge: {
-    padding: '6px 12px',
-    borderRadius: '16px',
-    fontSize: '12px',
-    fontWeight: '600',
-    border: '1px solid transparent',
-  },
-  taskDescription: {
-    fontSize: '14px',
-    color: '#172B4D',
-    lineHeight: '20px',
-    marginBottom: '16px',
-    backgroundColor: '#F4F5F7',
-    padding: '12px',
-    borderRadius: '4px',
-    borderLeft: '3px solid #0052CC',
-  },
-  taskFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: '16px',
-    borderTop: '1px solid #DFE1E6',
-  },
-  taskInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    flexWrap: 'wrap',
-  },
-  priorityBadge: {
-    fontSize: '12px',
-    fontWeight: '600',
-  },
-  createdDate: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  statusActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  statusSelect: {
-    padding: '6px 12px',
-    fontSize: '12px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    backgroundColor: '#FFFFFF',
-    cursor: 'pointer',
-    fontWeight: '500',
-  },
-};
-
-// Add CSS animation for spinner and hover effects
-const styleSheet = document.createElement('style');
-styleSheet.type = 'text/css';
-styleSheet.innerText = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  a[style*="backButton"]:hover {
-    background-color: #0052CC !important;
-    color: #FFFFFF !important;
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Dev_Tasks;

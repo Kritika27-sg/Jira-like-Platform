@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ProjectForm = () => {
@@ -7,7 +7,17 @@ const ProjectForm = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
+
+  // Track mouse position for subtle parallax effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,341 +116,203 @@ const ProjectForm = () => {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Creating project...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
+              Creating project...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+          }}
+        />
+        <div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+          }}
+        />
+      </div>
+
       {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
           <button 
-            style={styles.backButton}
             onClick={handleBackClick}
-            type="button"
+            className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+            title="Back to Projects"
           >
-            ← Back to Projects
+            <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>➕ Create New Project</h1>
-            <p style={styles.pageSubtitle}>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              ➕ Create New Project
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
               Set up a new project to organize your work
             </p>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div style={styles.mainContent}>
-        <div style={styles.formCard}>
-          <form onSubmit={handleSubmit} style={styles.form}>
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+        <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Alert Messages */}
             {errorMsg && (
-              <div style={styles.errorAlert}>
-                <span style={styles.alertIcon}>⚠️</span>
-                <span>{errorMsg}</span>
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50/80 border border-red-200/50 backdrop-blur-sm">
+                <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-red-800">Error</p>
+                  <p className="text-red-700">{errorMsg}</p>
+                </div>
               </div>
             )}
             
             {successMsg && (
-              <div style={styles.successAlert}>
-                <span style={styles.alertIcon}>✅</span>
-                <span>{successMsg}</span>
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50/80 border border-green-200/50 backdrop-blur-sm">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-green-800">Success</p>
+                  <p className="text-green-700">{successMsg}</p>
+                </div>
               </div>
             )}
 
             {/* Form Fields */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Project Name <span style={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-                style={{
-                  ...styles.input,
-                  ...(name.trim() ? {} : styles.inputEmpty)
-                }}
-                placeholder="Enter project name"
-                required
-                maxLength={255}
-              />
-              <p style={styles.fieldHint}>
-                Choose a clear, descriptive name for your project
-              </p>
-            </div>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Project Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  placeholder="Enter project name"
+                  required
+                  maxLength={255}
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Choose a clear, descriptive name for your project
+                </p>
+              </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={loading}
-                style={styles.textarea}
-                placeholder="Enter project description (optional)"
-                maxLength={1000}
-                rows="4"
-              />
-              <p style={styles.fieldHint}>
-                Provide additional context about the project's goals and scope
-              </p>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none placeholder-gray-400"
+                  placeholder="Enter project description (optional)"
+                  maxLength={1000}
+                  rows="4"
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-xs text-gray-500">
+                    Provide additional context about the project's goals and scope
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {description.length}/1000
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Form Actions */}
-            <div style={styles.formActions}>
+            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200/50">
               <button
                 type="button"
                 onClick={handleBackClick}
                 disabled={loading}
-                style={{
-                  ...styles.cancelButton,
-                  ...(loading ? styles.disabledButton : {})
-                }}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button 
                 type="submit" 
                 disabled={loading || !name.trim()} 
-                style={{
-                  ...styles.submitButton,
-                  ...(loading || !name.trim() ? styles.disabledButton : {})
-                }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg group"
               >
                 {loading ? (
                   <>
-                    <span style={styles.buttonSpinner}></span>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                     Creating...
                   </>
                 ) : (
                   <>
-                    ➕ Create Project
+                    <span className="text-lg group-hover:scale-110 transition-transform duration-200">➕</span>
+                    Create Project
                   </>
                 )}
               </button>
             </div>
           </form>
         </div>
-      </div>
+
+        {/* Tips Section */}
+        <div className="mt-8 backdrop-blur-sm bg-white/40 rounded-2xl border border-white/20 shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-xl">💡</span>
+            Tips for Creating a Great Project
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span>Use descriptive names that clearly identify the project's purpose</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span>Include key objectives and scope in the description</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span>Efficiently update details even after creation</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span>Set up milestones and deadlines to track progress</span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '800px',
-    margin: '0 auto',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  titleSection: {
-    marginBottom: '8px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  mainContent: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
-  },
-  spinner: {
-    width: '40px',
-    height: '40px',
-    border: '3px solid #DFE1E6',
-    borderTop: '3px solid #0052CC',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    fontSize: '16px',
-    color: '#6B778C',
-    marginTop: '16px',
-    margin: '16px 0 0 0',
-  },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '32px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  },
-  errorAlert: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px 16px',
-    backgroundColor: '#FFEBE6',
-    border: '1px solid #FFBDAD',
-    borderRadius: '4px',
-    color: '#BF2600',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-  successAlert: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px 16px',
-    backgroundColor: '#E3FCEF',
-    border: '1px solid #ABF5D1',
-    borderRadius: '4px',
-    color: '#00875A',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-  alertIcon: {
-    fontSize: '16px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-    lineHeight: '20px',
-  },
-  required: {
-    color: '#DE350B',
-  },
-  input: {
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-    fontFamily: 'inherit',
-    backgroundColor: '#FFFFFF',
-  },
-  inputEmpty: {
-    borderColor: '#DFE1E6',
-  },
-  textarea: {
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    minHeight: '80px',
-    backgroundColor: '#FFFFFF',
-  },
-  fieldHint: {
-    fontSize: '12px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '16px',
-  },
-  formActions: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    marginTop: '8px',
-  },
-  cancelButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  submitButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  disabledButton: {
-    opacity: '0.5',
-    cursor: 'not-allowed',
-  },
-  buttonSpinner: {
-    width: '14px',
-    height: '14px',
-    border: '2px solid transparent',
-    borderTop: '2px solid #FFFFFF',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-};
-
-// Add CSS animation for spinner
-const styleSheet = document.createElement('style');
-styleSheet.type = 'text/css';
-styleSheet.innerText = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default ProjectForm;

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 //import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TaskList = () => {
   //const { user } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -17,6 +18,16 @@ const TaskList = () => {
     status: '', 
     assignee_id: '' 
   });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse position for subtle parallax effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const fetchTasks = async () => {
     try {
@@ -100,7 +111,6 @@ const TaskList = () => {
     }
 
     try {
-      // Prepare the update data - ensure all fields are properly formatted
       const updateData = {
         title: updateForm.title.trim(),
         description: updateForm.description.trim(),
@@ -108,12 +118,9 @@ const TaskList = () => {
         project_id: selectedTask.project_id
       };
 
-      // Add assignee if selected
       if (updateForm.assignee_id) {
         updateData.assignee_id = parseInt(updateForm.assignee_id);
       }
-
-      console.log('Sending update data:', updateData); // Debug log
 
       const res = await fetch(`http://localhost:8000/tasks/${selectedTask.id}`, {
         method: 'PUT',
@@ -124,10 +131,8 @@ const TaskList = () => {
         body: JSON.stringify(updateData),
       });
 
-      // Check if response is ok
       if (!res.ok) {
-        const errorData = await res.text(); // Get error details
-        console.error('Update failed:', errorData);
+        const errorData = await res.text();
         throw new Error(`Failed to update task: ${res.status} ${res.statusText}`);
       }
       
@@ -141,7 +146,6 @@ const TaskList = () => {
       setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
       alert('Task updated successfully!');
     } catch (error) {
-      console.error('Update error:', error);
       alert(`Error updating task: ${error.message}`);
     }
   };
@@ -190,13 +194,13 @@ const TaskList = () => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'to do':
-        return { color: '#6B778C', backgroundColor: '#F4F5F7' };
+        return 'from-gray-400 to-gray-500';
       case 'in progress':
-        return { color: '#0052CC', backgroundColor: '#DEEBFF' };
+        return 'from-blue-400 to-blue-500';
       case 'done':
-        return { color: '#00875A', backgroundColor: '#E3FCEF' };
+        return 'from-green-400 to-emerald-500';
       default:
-        return { color: '#6B778C', backgroundColor: '#F4F5F7' };
+        return 'from-gray-400 to-gray-500';
     }
   };
 
@@ -242,162 +246,212 @@ const TaskList = () => {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Loading tasks...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
+              Loading tasks...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link to="/dashboard" style={styles.backLink}>
-            <button style={styles.backButton}>
-              ← Back to Dashboard
-            </button>
-          </Link>
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>📋 Tasks</h1>
-            <p style={styles.pageSubtitle}>
-              Manage and track your tasks
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+          }}
+        />
+        <div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+          }}
+        />
       </div>
 
+      {/* Header */}
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+            title="Back to Dashboard"
+          >
+            <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Tasks
+          </h1>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <div style={styles.mainContent}>
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {!tasks.length ? (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>📋</div>
-            <h3 style={styles.emptyTitle}>No tasks found</h3>
-            <p style={styles.emptySubtitle}>
-              Get started by creating your first task
-            </p>
-            <Link to="/tasks/new" style={styles.linkButton}>
-              <button style={styles.primaryButton}>
-                ➕ Create New Task
-              </button>
-            </Link>
+          <div className="text-center py-16">
+            <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12 max-w-2xl mx-auto">
+              <div className="text-6xl mb-6">✅</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">No tasks found</h3>
+              <p className="text-lg text-gray-600 mb-8">
+                Get started by creating your first task and boost your productivity
+              </p>
+              <Link to="/tasks/new">
+                <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  ➕ Create New Task
+                </button>
+              </Link>
+            </div>
           </div>
         ) : (
-          <>
-            {/* Action Buttons - Now above task cards */}
-            <div style={styles.actionsCard}>
-              <h3 style={styles.actionsTitle}>Actions</h3>
-              <div style={styles.actionButtons}>
-                <Link to="/tasks/new" style={styles.linkButton}>
-                  <button style={styles.primaryButton}>
-                    ➕ Create New Task
+          <div className="space-y-8">
+            {/* Action Buttons */}
+            <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">Task Actions</h3>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/tasks/new">
+                  <button className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                    <span className="text-lg group-hover:scale-110 transition-transform duration-200">➕</span>
+                    Create New Task
                   </button>
                 </Link>
-                <button style={styles.secondaryButton} onClick={openUpdateModal}>
-                  ✏️ Update Task
+                <button 
+                  onClick={openUpdateModal}
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform duration-200">✏️</span>
+                  Update Task
                 </button>
-                <button style={styles.dangerButton} onClick={openDeleteModal}>
-                  🗑️ Delete Task
+                <button 
+                  onClick={openDeleteModal}
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform duration-200">🗑️</span>
+                  Delete Task
                 </button>
               </div>
             </div>
 
             {/* Tasks Grid */}
-            <div style={styles.tasksGrid}>
-              {tasks.map((task) => (
-                <div key={task.id} style={styles.taskCard}>
-                  <div style={styles.taskHeader}>
-                    <div style={styles.taskTitleSection}>
-                      <h3 style={styles.taskTitle}>{task.title}</h3>
-                      <div style={styles.taskMeta}>
-                        <span style={styles.taskId}>#{task.id}</span>
-                        {task.priority && (
-                          <span style={styles.priorityIndicator}>
-                            {getPriorityIcon(task.priority)} {task.priority}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div 
-                      style={{
-                        ...styles.statusBadge,
-                        ...getStatusColor(task.status)
-                      }}
-                    >
-                      {getStatusIcon(task.status)} {task.status}
-                    </div>
-                  </div>
-                  <p style={styles.taskDescription}>
-                    {task.description || 'No description provided'}
-                  </p>
-                  <div style={styles.taskFooter}>
-                    <div style={styles.taskFooterRow}>
-                      <span style={styles.statItem}>
-                        <span style={styles.statIcon}>📁</span>
-                        {getProjectName(task.project_id)}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tasks.map((task, index) => (
+                <div 
+                  key={task.id}
+                  className="group backdrop-blur-sm bg-white/60 rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  style={{
+                    animationDelay: `${index * 0.1}s`
+                  }}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-900 transition-colors duration-200 line-clamp-2">
+                      {task.title}
+                    </h3>
+                    <div className="ml-4 flex-shrink-0">
+                      <span className={`px-3 py-1 bg-gradient-to-r ${getStatusColor(task.status)} text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg`}>
+                        {getStatusIcon(task.status)} {task.status}
                       </span>
                     </div>
-                    <div style={styles.taskFooterRow}>
-                      {task.assignee_id && (
-                        <span style={styles.statItem}>
-                          <span style={styles.statIcon}>👤</span>
-                          {getAssigneeName(task.assignee_id)}
-                        </span>
-                      )}
-                      {!task.assignee_id && (
-                        <span style={styles.statItem}>
-                          <span style={styles.statIcon}>👤</span>
-                          Unassigned
-                        </span>
-                      )}
+                  </div>
+                  
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200 mb-4 line-clamp-3">
+                    {task.description || 'No description provided'}
+                  </p>
+
+                  <div className="space-y-3">
+                    {/* Project Info */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">
+                        📁 {getProjectName(task.project_id)}
+                      </span>
+                    </div>
+
+                    {/* Assignee Info */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">
+                        👤 {task.assignee_id ? getAssigneeName(task.assignee_id) : 'Unassigned'}
+                      </span>
+                    </div>
+
+                    {/* Priority and ID */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {task.priority && (
+                          <>
+                            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                            <span className="text-sm text-gray-600">
+                              {getPriorityIcon(task.priority)} {task.priority}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold text-xs shadow-lg group-hover:scale-110 transition-transform duration-200">
+                        #{task.id}
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
-      </div>
+      </main>
 
       {/* Delete Modal */}
       {showDeleteModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Delete Task</h3>
-              <p style={styles.modalSubtitle}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-md bg-white/90 rounded-3xl border border-white/30 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-8 border-b border-white/20">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Delete Task</h3>
+              <p className="text-gray-600">
                 Select a task to delete. This action cannot be undone.
               </p>
             </div>
             
-            <div style={styles.modalContent}>
-              <div style={styles.taskSelection}>
+            <div className="p-8 max-h-96 overflow-y-auto">
+              <div className="space-y-4">
                 {tasks.map((task) => (
                   <div
                     key={task.id}
-                    style={selectedTask?.id === task.id ? styles.taskOptionSelected : styles.taskOption}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      selectedTask?.id === task.id
+                        ? 'border-red-500 bg-red-50/80 shadow-lg scale-105'
+                        : 'border-gray-200 bg-white/50 hover:bg-white/80 hover:border-gray-300'
+                    }`}
                     onClick={() => selectTaskForDelete(task)}
                   >
-                    <div style={styles.taskOptionHeader}>
-                      <strong style={styles.taskOptionName}>{task.title}</strong>
-                      <div style={styles.taskOptionMeta}>
-                        <span 
-                          style={{
-                            ...styles.taskOptionStatus,
-                            ...getStatusColor(task.status)
-                          }}
-                        >
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-semibold text-gray-800">{task.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 bg-gradient-to-r ${getStatusColor(task.status)} text-white text-xs font-semibold rounded-full`}>
                           {task.status}
                         </span>
                         {selectedTask?.id === task.id && (
-                          <span style={styles.selectedIndicator}>✓</span>
+                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
                         )}
                       </div>
                     </div>
-                    <p style={styles.taskOptionDesc}>
+                    <p className="text-sm text-gray-600">
                       {task.description || 'No description'} • Project: {getProjectName(task.project_id)}
                     </p>
                   </div>
@@ -405,23 +459,24 @@ const TaskList = () => {
               </div>
             </div>
 
-            <div style={styles.modalFooter}>
+            <div className="p-8 border-t border-white/20 flex justify-end gap-4">
               <button
-                style={styles.cancelButton}
                 onClick={() => {
                   setShowDeleteModal(false);
                   setSelectedTask(null);
                 }}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200"
               >
                 Cancel
               </button>
               <button
-                style={{
-                  ...styles.confirmDeleteButton,
-                  ...(selectedTask ? {} : styles.disabledButton)
-                }}
                 onClick={() => handleDeleteTask(selectedTask.id)}
                 disabled={!selectedTask}
+                className={`px-6 py-3 font-semibold rounded-xl transition-all duration-200 ${
+                  selectedTask
+                    ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white hover:shadow-lg hover:scale-105'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 Delete Task
               </button>
@@ -432,39 +487,38 @@ const TaskList = () => {
 
       {/* Update Modal */}
       {showUpdateModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Update Task</h3>
-              <p style={styles.modalSubtitle}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-md bg-white/90 rounded-3xl border border-white/30 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-8 border-b border-white/20">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Update Task</h3>
+              <p className="text-gray-600">
                 {!selectedTask ? 'Select a task to update' : 'Update task details'}
               </p>
             </div>
 
-            <div style={styles.modalContent}>
+            <div className="p-8 max-h-96 overflow-y-auto">
               {!selectedTask ? (
-                <div style={styles.taskSelection}>
+                <div className="space-y-4">
                   {tasks.map((task) => (
                     <div
                       key={task.id}
-                      style={styles.taskOption}
+                      className="p-4 rounded-xl border-2 border-gray-200 bg-white/50 hover:bg-white/80 hover:border-blue-300 cursor-pointer transition-all duration-200 hover:scale-105"
                       onClick={() => selectTaskForUpdate(task)}
                     >
-                      <div style={styles.taskOptionHeader}>
-                        <strong style={styles.taskOptionName}>{task.title}</strong>
-                        <div style={styles.taskOptionMeta}>
-                          <span 
-                            style={{
-                              ...styles.taskOptionStatus,
-                              ...getStatusColor(task.status)
-                            }}
-                          >
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-semibold text-gray-800">{task.title}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 bg-gradient-to-r ${getStatusColor(task.status)} text-white text-xs font-semibold rounded-full`}>
                             {task.status}
                           </span>
-                          <span style={styles.editIcon}>✏️</span>
+                          <div className="text-blue-500">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
-                      <p style={styles.taskOptionDesc}>
+                      <p className="text-sm text-gray-600">
                         {task.description || 'No description'} • Project: {getProjectName(task.project_id)}
                         {task.assignee_id && ` • Assigned to: ${getAssigneeName(task.assignee_id)}`}
                       </p>
@@ -472,37 +526,40 @@ const TaskList = () => {
                   ))}
                 </div>
               ) : (
-                <form onSubmit={handleUpdateTask} style={styles.form}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Task Title</label>
+                <form onSubmit={handleUpdateTask} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Task Title
+                    </label>
                     <input
                       type="text"
                       value={updateForm.title}
                       onChange={(e) => setUpdateForm({...updateForm, title: e.target.value})}
-                      style={styles.input}
+                      className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       required
                       placeholder="Enter task title"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Description</label>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Description
+                    </label>
                     <textarea
                       value={updateForm.description}
                       onChange={(e) => setUpdateForm({...updateForm, description: e.target.value})}
-                      style={styles.textarea}
+                      className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                       rows="4"
                       placeholder="Enter task description"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>
-                      <span style={styles.labelIcon}>👤</span>
-                      Assign to Developer
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      👤 Assign to Developer
                     </label>
                     <select
                       value={updateForm.assignee_id}
                       onChange={(e) => setUpdateForm({...updateForm, assignee_id: e.target.value})}
-                      style={styles.select}
+                      className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     >
                       <option value="">Select a developer (optional)</option>
                       {developers.length > 0 ? (
@@ -516,16 +573,18 @@ const TaskList = () => {
                         <option disabled>No developers available</option>
                       )}
                     </select>
-                    <p style={styles.fieldHint}>
+                    <p className="text-xs text-gray-500 mt-1">
                       Leave empty to unassign the task
                     </p>
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Status</label>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Status
+                    </label>
                     <select
                       value={updateForm.status}
                       onChange={(e) => setUpdateForm({...updateForm, status: e.target.value})}
-                      style={styles.select}
+                      className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       required
                     >
                       <option value="">Select Status</option>
@@ -534,499 +593,35 @@ const TaskList = () => {
                       <option value="Done">Done</option>
                     </select>
                   </div>
-                  <div style={styles.modalFooter}>
-                    <button
-                      type="button"
-                      style={styles.cancelButton}
-                      onClick={() => {
-                        setShowUpdateModal(false);
-                        setSelectedTask(null);
-                        setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      style={styles.confirmUpdateButton}
-                    >
-                      Update Task
-                    </button>
-                  </div>
                 </form>
               )}
             </div>
 
-            {!selectedTask && (
-              <div style={styles.modalFooter}>
+            <div className="p-8 border-t border-white/20 flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setShowUpdateModal(false);
+                  setSelectedTask(null);
+                  setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
+                }}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200"
+              >
+                Cancel
+              </button>
+              {selectedTask && (
                 <button
-                  style={styles.cancelButton}
-                  onClick={() => {
-                    setShowUpdateModal(false);
-                    setSelectedTask(null);
-                    setUpdateForm({ title: '', description: '', status: '', assignee_id: '' });
-                  }}
+                  onClick={handleUpdateTask}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
-                  Cancel
+                  Update Task
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  backLink: {
-    textDecoration: 'none',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  titleSection: {
-    marginBottom: '8px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  mainContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
-  },
-  spinner: {
-    width: '40px',
-    height: '40px',
-    border: '3px solid #DFE1E6',
-    borderTop: '3px solid #0052CC',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    fontSize: '16px',
-    color: '#6B778C',
-    marginTop: '16px',
-    margin: '16px 0 0 0',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '64px 32px',
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    border: '1px solid #DFE1E6',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  emptyIcon: {
-    fontSize: '48px',
-    marginBottom: '16px',
-  },
-  emptyTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  emptySubtitle: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0 0 32px 0',
-  },
-  tasksGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '24px',
-    marginTop: '32px', // Added margin to separate from actions card above
-  },
-  taskCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-    cursor: 'pointer',
-  },
-  taskHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '12px',
-  },
-  taskTitleSection: {
-    flex: '1',
-  },
-  taskTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 4px 0',
-    lineHeight: '24px',
-  },
-  taskMeta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  taskId: {
-    fontSize: '12px',
-    color: '#6B778C',
-    fontWeight: '500',
-  },
-  priorityIndicator: {
-    fontSize: '11px',
-    color: '#6B778C',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2px',
-  },
-  statusBadge: {
-    fontSize: '11px',
-    fontWeight: '600',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    whiteSpace: 'nowrap',
-  },
-  taskDescription: {
-    fontSize: '14px',
-    color: '#6B778C',
-    lineHeight: '20px',
-    margin: '0 0 16px 0',
-    minHeight: '40px',
-  },
-  taskFooter: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  taskFooterRow: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  statItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  statIcon: {
-    fontSize: '14px',
-  },
-  actionsCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  actionsTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 16px 0',
-  },
-  actionButtons: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
-  linkButton: {
-    textDecoration: 'none',
-  },
-  primaryButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  secondaryButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  dangerButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#DE350B',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    right: '0',
-    bottom: '0',
-    backgroundColor: 'rgba(9, 30, 66, 0.54)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: '1000',
-  },
-  modal: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    boxShadow: '0 8px 16px rgba(9, 30, 66, 0.25)',
-    maxWidth: '600px',
-    width: '90%',
-    maxHeight: '80vh',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  modalHeader: {
-    padding: '24px 24px 16px 24px',
-    borderBottom: '1px solid #DFE1E6',
-  },
-  modalTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  modalSubtitle: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '20px',
-  },
-  modalContent: {
-    padding: '24px',
-    flex: '1',
-    overflowY: 'auto',
-  },
-  modalFooter: {
-    padding: '16px 24px 24px 24px',
-    borderTop: '1px solid #DFE1E6',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-  },
-  taskSelection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  taskOption: {
-    padding: '16px',
-    borderTop: '1px solid #DFE1E6',
-    borderRight: '1px solid #DFE1E6',
-    borderBottom: '1px solid #DFE1E6',
-    borderLeft: '1px solid #DFE1E6',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'border-color 0.2s ease, background-color 0.2s ease',
-    backgroundColor: '#FAFBFC',
-  },
-  taskOptionSelected: {
-    padding: '16px',
-    borderTop: '1px solid #0052CC',
-    borderRight: '1px solid #0052CC',
-    borderBottom: '1px solid #0052CC',
-    borderLeft: '1px solid #0052CC',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'border-color 0.2s ease, background-color 0.2s ease',
-    backgroundColor: '#DEEBFF',
-  },
-  taskOptionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '4px',
-  },
-  taskOptionName: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-  },
-  taskOptionMeta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  taskOptionStatus: {
-    fontSize: '10px',
-    fontWeight: '600',
-    padding: '2px 6px',
-    borderRadius: '8px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  selectedIndicator: {
-    fontSize: '12px',
-    color: '#0052CC',
-    fontWeight: '600',
-  },
-  editIcon: {
-    fontSize: '12px',
-  },
-  taskOptionDesc: {
-    fontSize: '12px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '16px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  labelIcon: {
-    fontSize: '16px',
-  },
-  input: {
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-    fontFamily: 'inherit',
-  },
-  textarea: {
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    minHeight: '80px',
-  },
-  select: {
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-    fontFamily: 'inherit',
-    backgroundColor: '#FFFFFF',
-  },
-  cancelButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  confirmDeleteButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#DE350B',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  confirmUpdateButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  disabledButton: {
-    opacity: '0.5',
-    cursor: 'not-allowed',
-  },
-};
-
-// Add CSS animation for spinner
-const styleSheet = document.createElement('style');
-styleSheet.type = 'text/css';
-styleSheet.innerText = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default TaskList;

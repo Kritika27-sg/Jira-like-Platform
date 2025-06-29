@@ -4,14 +4,24 @@ import { useNavigate, Link } from 'react-router-dom';
 const TaskForm = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState('Todo');
+  const [status, setStatus] = useState('To Do');
   const [projectId, setProjectId] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
+
+  // Track mouse position for subtle parallax effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
   
   useEffect(() => {
     // Fetch projects
@@ -96,39 +106,78 @@ const TaskForm = () => {
     user.role && user.role.toLowerCase() === 'developer'
   );
 
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'to do':
+        return '📋';
+      case 'in progress':
+        return '⚡';
+      case 'done':
+        return '✅';
+      default:
+        return '📋';
+    }
+  };
+
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+          }}
+        />
+        <div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+          }}
+        />
+      </div>
+
       {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link to="/tasks" style={styles.backLink}>
-            <button style={styles.backButton}>
-              ← Back to Tasks
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <Link to="/tasks">
+            <button 
+              className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+              title="Back to Tasks"
+            >
+              <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
           </Link>
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>➕ Create New Task</h1>
-            <p style={styles.pageSubtitle}>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              ➕ Create New Task
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
               Add a new task to your project and assign it to a team member
             </p>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div style={styles.mainContent}>
-        <div style={styles.formCard}>
-          <div style={styles.formHeader}>
-            <h2 style={styles.formTitle}>Task Details</h2>
-            <p style={styles.formSubtitle}>
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8">
+        <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl overflow-hidden">
+          {/* Form Header */}
+          <div className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-b border-white/20 p-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Task Details</h2>
+            <p className="text-gray-600">
               Fill in the information below to create your task
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} style={styles.form}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>📁</span>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            {/* Project Selection */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="text-lg">📁</span>
                 Project *
               </label>
               <select
@@ -136,7 +185,7 @@ const TaskForm = () => {
                 onChange={e => setProjectId(e.target.value)}
                 required
                 disabled={loading}
-                style={styles.select}
+                className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-60"
               >
                 <option value="">Select a project</option>
                 {projects.map(p => (
@@ -145,9 +194,10 @@ const TaskForm = () => {
               </select>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>📝</span>
+            {/* Task Title */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="text-lg">📝</span>
                 Task Title *
               </label>
               <input
@@ -156,37 +206,38 @@ const TaskForm = () => {
                 onChange={e => setTitle(e.target.value)}
                 required
                 disabled={loading}
-                style={styles.input}
+                className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-60"
                 placeholder="Enter a descriptive task title"
               />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>📄</span>
+            {/* Description */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="text-lg">📄</span>
                 Description
               </label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 disabled={loading}
-                style={styles.textarea}
+                className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none disabled:opacity-60"
                 rows="4"
                 placeholder="Provide additional details about the task (optional)"
               />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>👤</span>
+            {/* Assignee */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="text-lg">👤</span>
                 Assign to Developer
               </label>
-              
               <select
                 value={assigneeId}
                 onChange={e => setAssigneeId(e.target.value)}
                 disabled={loading}
-                style={styles.select}
+                className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-60"
               >
                 <option value="">Select a developer (optional)</option>
                 {developers.length > 0 ? (
@@ -202,331 +253,84 @@ const TaskForm = () => {
               </select>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>🏷️</span>
+            {/* Status */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="text-lg">🏷️</span>
                 Status *
               </label>
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value)}
                 disabled={loading}
-                style={styles.select}
+                className="w-full px-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-60"
               >
-                <option value="To Do">📋 To Do</option>
-                <option value="In Progress">⚡ In Progress</option>
-                <option value="Done">✅ Done</option>
+                <option value="To Do">{getStatusIcon('To Do')} To Do</option>
+                <option value="In Progress">{getStatusIcon('In Progress')} In Progress</option>
+                <option value="Done">{getStatusIcon('Done')} Done</option>
               </select>
             </div>
 
-            <div style={styles.formActions}>
-              <Link to="/tasks" style={styles.linkButton}>
-                <button type="button" style={styles.cancelButton}>
+            {/* Form Actions */}
+            <div className="flex gap-4 justify-end pt-6 border-t border-white/20">
+              <Link to="/tasks">
+                <button 
+                  type="button" 
+                  className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200 hover:scale-105"
+                >
                   Cancel
                 </button>
               </Link>
               <button 
                 type="submit" 
                 disabled={loading}
-                style={{
-                  ...styles.submitButton,
-                  ...(loading ? styles.disabledButton : {})
-                }}
+                className={`flex items-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-200 ${
+                  loading 
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                }`}
               >
                 {loading ? (
                   <>
-                    <span style={styles.spinner}></span>
+                    <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
                     Creating...
                   </>
                 ) : (
-                  <>➕ Create Task</>
+                  <>
+                    <span className="text-lg">➕</span>
+                    Create Task
+                  </>
                 )}
               </button>
             </div>
           </form>
         </div>
-      </div>
+      </main>
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.successModal}>
-            <div style={styles.successIcon}>✅</div>
-            <h3 style={styles.successTitle}>Task Created Successfully!</h3>
-            <p style={styles.successMessage}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-md bg-white/90 rounded-3xl border border-white/30 shadow-2xl max-w-md w-full text-center p-8 animate-pulse">
+            <div className="text-6xl mb-6">✅</div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Task Created Successfully!</h3>
+            <p className="text-gray-600 mb-2">
               Your task has been created and added to the project.
               {assigneeId && " The assigned developer will be notified."}
             </p>
-            <p style={styles.redirectMessage}>
+            <p className="text-sm text-gray-500 mb-6 italic">
               Redirecting you back to the task list...
             </p>
-            <div style={styles.successActions}>
-              <button 
-                style={styles.successButton}
-                onClick={handleSuccessModalClose}
-              >
-                Go to Tasks
-              </button>
-            </div>
+            <button 
+              onClick={handleSuccessModalClose}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
+            >
+              Go to Tasks
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '800px',
-    margin: '0 auto',
-  },
-  backLink: {
-    textDecoration: 'none',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  titleSection: {
-    marginBottom: '8px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  mainContent: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    overflow: 'hidden',
-  },
-  formHeader: {
-    padding: '24px 32px 16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  formTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  formSubtitle: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '20px',
-  },
-  form: {
-    padding: '32px',
-  },
-  formGroup: {
-    marginBottom: '24px',
-  },
-  label: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-    marginBottom: '8px',
-  },
-  labelIcon: {
-    fontSize: '16px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px 16px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px 16px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    minHeight: '100px',
-    boxSizing: 'border-box',
-  },
-  select: {
-    width: '100%',
-    padding: '12px 16px',
-    fontSize: '14px',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    outline: 'none',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-    fontFamily: 'inherit',
-    backgroundColor: '#FFFFFF',
-    boxSizing: 'border-box',
-  },
-  fieldHint: {
-    fontSize: '12px',
-    color: '#6B778C',
-    margin: '4px 0 0 0',
-    fontStyle: 'italic',
-  },
-  formActions: {
-    display: 'flex',
-    gap: '12px',
-    justifyContent: 'flex-end',
-    paddingTop: '16px',
-    borderTop: '1px solid #DFE1E6',
-    marginTop: '32px',
-  },
-  linkButton: {
-    textDecoration: 'none',
-  },
-  cancelButton: {
-    padding: '12px 24px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  submitButton: {
-    padding: '12px 24px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#0052CC',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  disabledButton: {
-    opacity: '0.6',
-    cursor: 'not-allowed',
-  },
-  spinner: {
-    width: '16px',
-    height: '16px',
-    border: '2px solid rgba(255, 255, 255, 0.3)',
-    borderTop: '2px solid #FFFFFF',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    right: '0',
-    bottom: '0',
-    backgroundColor: 'rgba(9, 30, 66, 0.54)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: '1000',
-  },
-  successModal: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    boxShadow: '0 8px 16px rgba(9, 30, 66, 0.25)',
-    padding: '32px',
-    maxWidth: '400px',
-    width: '90%',
-    textAlign: 'center',
-  },
-  successIcon: {
-    fontSize: '48px',
-    marginBottom: '16px',
-  },
-  successTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 12px 0',
-  },
-  successMessage: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0 0 8px 0',
-    lineHeight: '20px',
-  },
-  redirectMessage: {
-    fontSize: '12px',
-    color: '#6B778C',
-    margin: '0 0 24px 0',
-    fontStyle: 'italic',
-  },
-  successActions: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  successButton: {
-    padding: '10px 20px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#FFFFFF',
-    backgroundColor: '#00875A',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-};
-
-// Add CSS animation for spinner
-const styleSheet = document.createElement('style');
-styleSheet.type = 'text/css';
-styleSheet.innerText = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default TaskForm;

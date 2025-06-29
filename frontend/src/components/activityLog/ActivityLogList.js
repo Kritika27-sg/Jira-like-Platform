@@ -10,6 +10,16 @@ const ProjectTaskActivityViewer = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [error, setError] = useState(null);
   const [projectTaskCounts, setProjectTaskCounts] = useState({});
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse position for subtle parallax effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Fetch task count for a specific project
   const fetchTaskCount = async (projectId) => {
@@ -151,18 +161,6 @@ const ProjectTaskActivityViewer = () => {
     }));
   };
 
-  // Colors for pie chart
-  const COLORS = {
-    'Completed': '#00875A',
-    'Done': '#00875A',
-    'In Progress': '#0052CC',
-    'Active': '#0052CC',
-    'Pending': '#FF8B00',
-    'Todo': '#FF8B00',
-    'To Do': '#FF8B00',
-    'Unknown': '#6B778C'
-  };
-
   const getColorForStatus = (status) => {
     const statusLower = status.toLowerCase();
     if (statusLower.includes('completed') || statusLower.includes('done')) return '#00875A';
@@ -179,10 +177,20 @@ const ProjectTaskActivityViewer = () => {
   // Loading state
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <span style={styles.loadingText}>Loading...</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-12">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">
+              Loading...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -191,105 +199,173 @@ const ProjectTaskActivityViewer = () => {
   // Projects view
   if (view === 'projects') {
     return (
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <div style={styles.headerContent}>
-            <button style={styles.backButton} onClick={() => window.history.back()}>
-              ← Back to Dashboard
-            </button>
-            <div style={styles.titleSection}>
-              <h1 style={styles.pageTitle}>Projects</h1>
-              <p style={styles.pageSubtitle}>Select a project to view its tasks and progress</p>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div 
+            className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+            style={{
+              transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+            }}
+          />
+          <div 
+            className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+            style={{
+              transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+            }}
+          />
         </div>
 
-        <div style={styles.mainContent}>
-          <div style={styles.formCard}>
-            <div style={styles.formHeader}>
-              <h2 style={styles.formTitle}>📋 Select a Project</h2>
+        {/* Header */}
+        <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+          <div className="px-6 py-4 flex items-center gap-4">
+            <button 
+              onClick={() => window.history.back()} 
+              className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+              title="Back to Dashboard"
+            >
+              <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Project Activity Dashboard
+            </h1>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+          <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl p-8">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">📋 Select a Project</h2>
+              <p className="text-gray-600">
+                Choose a project to view its tasks and progress analytics
+              </p>
             </div>
             
-            <div style={styles.cardContent}>
-              {!projects.length ? (
-                <div style={styles.emptyState}>
-                  <div style={styles.emptyIcon}>🏗️</div>
-                  <p style={styles.emptyText}>No projects available</p>
-                  <p style={styles.emptySubtext}>Contact your project manager for access.</p>
-                </div>
-              ) : (
-                <div style={styles.projectGrid}>
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      style={styles.projectCard}
-                      onClick={() => handleProjectClick(project)}
-                    >
-                      <div style={styles.projectHeader}>
-                        <h4 style={styles.projectName}>{project.name}</h4>
-                        <div style={styles.projectBadge}>Active</div>
-                      </div>
-                      <p style={styles.projectDescription}>
-                        {project.description || 'No description provided'}
-                      </p>
-                      <div style={styles.projectFooter}>
-                        <span style={styles.taskCount}>
-                          {projectTaskCounts[project.id] || 0} tasks
+            {!projects.length ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-6">🏗️</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">No projects available</h3>
+                <p className="text-lg text-gray-600">
+                  Contact your project manager for access to projects.
+                </p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((project, index) => (
+                  <div
+                    key={project.id}
+                    className="group backdrop-blur-sm bg-white/60 rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                    onClick={() => handleProjectClick(project)}
+                    style={{
+                      animationDelay: `${index * 0.1}s`
+                    }}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-900 transition-colors duration-200 line-clamp-2">
+                        {project.name}
+                      </h3>
+                      <div className="ml-4 flex-shrink-0">
+                        <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg">
+                          Active
                         </span>
-                        <span style={styles.selectText}>View Progress →</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    
+                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200 mb-4 line-clamp-3">
+                      {project.description || 'No description provided'}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          {projectTaskCounts[project.id] || 0} tasks
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-blue-600 font-medium text-sm">
+                        <span>View Progress</span>
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   // Tasks view with pie chart
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <button
-            style={styles.backButton}
-            onClick={handleBackToProjects}
-          >
-            ← Back to Projects
-          </button>
-          <div style={styles.titleSection}>
-            <h1 style={styles.pageTitle}>📋 Tasks - {selectedProject?.name}</h1>
-            <p style={styles.pageSubtitle}>Task overview and completion analytics</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
+          }}
+        />
+        <div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
+          }}
+        />
       </div>
 
-      <div style={styles.mainContent}>
-        <div style={styles.formCard}>
-          <div style={styles.formHeader}>
-            <h2 style={styles.formTitle}>📊 Project Overview</h2>
-            <p style={styles.formSubtitle}>
+      {/* Header */}
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <button
+            onClick={handleBackToProjects}
+            className="p-2 rounded-xl bg-white/60 hover:bg-white/80 border border-white/30 transition-all duration-200 hover:shadow-md group"
+            title="Back to Projects"
+          >
+            <svg className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            📋 Tasks - {selectedProject?.name}
+          </h1>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        <div className="backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl overflow-hidden">
+          <div className="p-8 border-b border-white/20">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">📊 Project Overview</h2>
+            <p className="text-gray-600">
               {selectedProject?.description || 'No description provided'}
             </p>
           </div>
           
-          <div style={styles.cardContent}>
-            {!tasks.length ? (
-              <div style={styles.emptyState}>
-                <div style={styles.emptyIcon}>📋</div>
-                <p style={styles.emptyText}>No tasks found</p>
-                <p style={styles.emptySubtext}>Tasks will appear here when they are created.</p>
-              </div>
-            ) : (
-              <div style={styles.dashboardLayout}>
+          {!tasks.length ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-6">📋</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">No tasks found</h3>
+              <p className="text-lg text-gray-600">
+                Tasks will appear here when they are created for this project.
+              </p>
+            </div>
+          ) : (
+            <div className="p-8">
+              <div className="grid lg:grid-cols-2 gap-8">
                 {/* Pie Chart Section */}
-                <div style={styles.chartSection}>
-                  <h3 style={styles.sectionTitle}>📊 Completion Status</h3>
-                  <div style={styles.chartContainer}>
-                    <ResponsiveContainer width="100%" height={300}>
+                <div className="backdrop-blur-sm bg-white/40 rounded-2xl p-6 border border-white/30">
+                  <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    Completion Status
+                  </h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={getCompletionData()}
@@ -312,18 +388,16 @@ const ProjectTaskActivityViewer = () => {
                   </div>
                   
                   {/* Summary Stats */}
-                  <div style={styles.statsGrid}>
+                  <div className="grid grid-cols-2 gap-4 mt-6">
                     {getCompletionData().map((item, index) => (
-                      <div key={index} style={styles.statCard}>
+                      <div key={index} className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
                         <div 
-                          style={{
-                            ...styles.statColor,
-                            backgroundColor: getColorForStatus(item.name)
-                          }}
-                        ></div>
-                        <div style={styles.statInfo}>
-                          <div style={styles.statValue}>{item.value}</div>
-                          <div style={styles.statLabel}>{item.name}</div>
+                          className="w-4 h-4 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: getColorForStatus(item.name) }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-lg font-bold text-gray-800">{item.value}</div>
+                          <div className="text-sm text-gray-600 truncate">{item.name}</div>
                         </div>
                       </div>
                     ))}
@@ -331,38 +405,54 @@ const ProjectTaskActivityViewer = () => {
                 </div>
 
                 {/* Tasks List Section */}
-                <div style={styles.tasksSection}>
-                  <h3 style={styles.sectionTitle}>📋 All Tasks ({tasks.length})</h3>
-                  <div style={styles.tasksList}>
-                    {tasks.map((task) => (
-                      <div key={task.id} style={styles.taskItem}>
-                        <div style={styles.taskHeader}>
-                          <h4 style={styles.taskTitle}>{task.title}</h4>
-                          <div style={styles.taskBadges}>
+                <div className="backdrop-blur-sm bg-white/40 rounded-2xl p-6 border border-white/30">
+                  <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    📋 All Tasks ({tasks.length})
+                  </h3>
+                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    {tasks.map((task, index) => (
+                      <div 
+                        key={task.id} 
+                        className="bg-white/60 rounded-xl p-4 border border-white/30 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                        style={{
+                          animationDelay: `${index * 0.05}s`
+                        }}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-semibold text-gray-800 line-clamp-2 flex-1 mr-2">
+                            {task.title}
+                          </h4>
+                          <div className="flex gap-2 flex-shrink-0">
                             {task.status && (
-                              <span style={{...styles.taskBadge, ...getStatusColor(task.status)}}>
+                              <span 
+                                className="px-2 py-1 text-xs font-semibold rounded-full"
+                                style={getStatusColor(task.status)}
+                              >
                                 {task.status}
                               </span>
                             )}
                             {task.priority && (
-                              <span style={{...styles.taskBadge, ...getPriorityColor(task.priority)}}>
+                              <span 
+                                className="px-2 py-1 text-xs font-semibold rounded-full"
+                                style={getPriorityColor(task.priority)}
+                              >
                                 {task.priority}
                               </span>
                             )}
                           </div>
                         </div>
-                        <p style={styles.taskDescription}>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                           {task.description || 'No description provided'}
                         </p>
-                        <div style={styles.taskFooter}>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
                           {task.assignee_id && (
-                            <span style={styles.assignee}>
+                            <span className="flex items-center gap-1">
                               👤 {getUserName(task.assignee_id)}
                             </span>
                           )}
                           {task.due_date && (
-                            <span style={styles.dueDate}>
-                              📅 Due: {new Date(task.due_date).toLocaleDateString()}
+                            <span className="flex items-center gap-1">
+                              📅 {new Date(task.due_date).toLocaleDateString()}
                             </span>
                           )}
                         </div>
@@ -371,330 +461,12 @@ const ProjectTaskActivityViewer = () => {
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
 
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#FAFBFC',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #DFE1E6',
-    padding: '24px 32px',
-  },
-  headerContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#172B4D',
-    marginBottom: '16px',
-    transition: 'background-color 0.2s ease',
-  },
-  titleSection: {
-    marginBottom: '8px',
-  },
-  pageTitle: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-    lineHeight: '32px',
-  },
-  pageSubtitle: {
-    fontSize: '16px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '24px',
-  },
-  mainContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '32px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '40px 20px',
-    gap: '12px',
-  },
-  spinner: {
-    width: '24px',
-    height: '24px',
-    border: '2px solid #DFE1E6',
-    borderTop: '2px solid #0052CC',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    fontSize: '14px',
-    color: '#6B778C',
-  },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-    overflow: 'hidden',
-  },
-  formHeader: {
-    padding: '24px 32px 16px 32px',
-    borderBottom: '1px solid #DFE1E6',
-    backgroundColor: '#F4F5F7',
-  },
-  formTitle: {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 8px 0',
-  },
-  formSubtitle: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-    lineHeight: '20px',
-  },
-  cardContent: {
-    padding: '32px',
-  },
-  projectGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '20px',
-  },
-  projectCard: {
-    backgroundColor: '#F4F5F7',
-    border: '1px solid #DFE1E6',
-    borderRadius: '8px',
-    padding: '20px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(9, 30, 66, 0.08)',
-  },
-  projectHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '12px',
-  },
-  projectName: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-    flex: 1,
-  },
-  projectBadge: {
-    fontSize: '10px',
-    fontWeight: '600',
-    color: '#00875A',
-    backgroundColor: '#E3FCEF',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    textTransform: 'uppercase',
-    marginLeft: '8px',
-  },
-  projectDescription: {
-    fontSize: '14px',
-    color: '#6B778C',
-    lineHeight: '20px',
-    margin: '0 0 16px 0',
-    minHeight: '40px',
-  },
-  projectFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  taskCount: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  selectText: {
-    fontSize: '12px',
-    color: '#0052CC',
-    fontWeight: '500',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '40px 20px',
-  },
-  emptyIcon: {
-    fontSize: '32px',
-    marginBottom: '12px',
-  },
-  emptyText: {
-    fontSize: '16px',
-    fontWeight: '500',
-    color: '#172B4D',
-    margin: '0 0 4px 0',
-  },
-  emptySubtext: {
-    fontSize: '14px',
-    color: '#6B778C',
-    margin: '0',
-  },
-  dashboardLayout: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '32px',
-    '@media (max-width: 768px)': {
-      gridTemplateColumns: '1fr',
-    },
-  },
-  chartSection: {
-    backgroundColor: '#F4F5F7',
-    borderRadius: '8px',
-    padding: '24px',
-  },
-  tasksSection: {
-    backgroundColor: '#F4F5F7',
-    borderRadius: '8px',
-    padding: '24px',
-    maxHeight: '600px',
-    overflowY: 'auto',
-  },
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0 0 16px 0',
-  },
-  chartContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '16px',
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-    gap: '12px',
-  },
-  statCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    padding: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  statColor: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '50%',
-  },
-  statInfo: {
-    flex: 1,
-  },
-  statValue: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#172B4D',
-  },
-  statLabel: {
-    fontSize: '12px',
-    color: '#6B778C',
-  },
-  tasksList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  taskItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '8px',
-    padding: '16px',
-    border: '1px solid #DFE1E6',
-  },
-  taskHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '8px',
-  },
-  taskTitle: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#172B4D',
-    margin: '0',
-    flex: 1,
-  },
-  taskBadges: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-    marginLeft: '8px',
-  },
-  taskBadge: {
-    fontSize: '10px',
-    fontWeight: '600',
-    padding: '4px 8px',
-    borderRadius: '12px',
-    textTransform: 'uppercase',
-  },
-  taskDescription: {
-    fontSize: '12px',
-    color: '#6B778C',
-    lineHeight: '16px',
-    margin: '0 0 8px 0',
-  },
-  taskFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '11px',
-    color: '#6B778C',
-  },
-  assignee: {
-    fontSize: '11px',
-    color: '#6B778C',
-  },
-  dueDate: {
-    fontSize: '11px',
-    color: '#6B778C',
-  },
-};
-
-// Add CSS animation for spinner and hover effects
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.type = 'text/css';
-  styleSheet.innerText = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .projectCard:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(9, 30, 66, 0.15);
-      border-color: #0052CC;
-    }
-    
-    @media (max-width: 768px) {
-      .dashboardLayout {
-        grid-template-columns: 1fr !important;
-      }
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
-
-export default ProjectTaskActivityViewer;
+export default ProjectTaskActivityViewer; 
