@@ -1,6 +1,7 @@
 import React, { Profiler } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import LandingPage from './components/auth/LandingPage';
 import Login from './components/auth/Login';
 import Logout from './components/auth/Logout';
 import Dashboard from './components/common/Dashboard';
@@ -21,8 +22,10 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
+
           
           <Route
             path="/dashboard"

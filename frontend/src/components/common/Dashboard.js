@@ -38,7 +38,7 @@ const Dashboard = () => {
         let info = '';
         switch (user?.role) {
             case 'Project Manager':
-                info = "Project Managers can create and manage only the projects they own, create tasks within those projects, and assign tasks only to Developers within their project.";
+                info = "Project Managers can create and manage only the projects they own, create tasks within those projects, and assign tasks only to Developers.";
                 break;
             case 'Developer':
                 info = "Developers can view and update tasks assigned to them.";
@@ -108,154 +108,158 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
-            {/* Animated Background Elements */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div 
-                    className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"
-                    style={{
-                        transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
-                    }}
-                />
-                <div 
-                    className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"
-                    style={{
-                        transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`
-                    }}
-                />
+        <div className="min-h-screen bg-black flex flex-col overflow-hidden">
+            {/* Animated Cursor */}
+            <div
+                className="fixed w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full pointer-events-none z-50 mix-blend-difference opacity-50 transition-transform duration-150 ease-out"
+                style={{
+                    left: mousePosition.x - 12,
+                    top: mousePosition.y - 12,
+                }}
+            />
+
+            {/* Enhanced Background */}
+            <div className="fixed inset-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 via-purple-900/50 to-pink-900/50"></div>
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-40"></div>
+                <div className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-40" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-gradient-to-r from-orange-500 to-rose-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-40" style={{ animationDelay: '4s' }}></div>
+
+                {/* Floating Elements */}
+                <div className="absolute top-20 left-20 w-4 h-4 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}></div>
+                <div className="absolute top-40 right-32 w-3 h-3 bg-purple-400/30 rounded-full animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
+                <div className="absolute bottom-32 left-1/4 w-5 h-5 bg-pink-400/20 rounded-full animate-bounce" style={{ animationDelay: '2s', animationDuration: '5s' }}></div>
             </div>
 
             {/* Header */}
-            <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 shadow-sm">
-                <div className="px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                <div className="w-6 h-6 bg-white/90 rounded mask-gradient"></div>
+            <header className="fixed w-full z-40 bg-black/80 backdrop-blur-2xl border-b border-white/10">
+                <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-3 sm:py-4">
+                        <div className="flex items-center space-x-2 sm:space-x-3 group cursor-pointer" onClick={() => navigate('/')}>
+                            <div className="relative">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl transform transition-all duration-300 group-hover:rotate-12 group-hover:scale-110">
+                                    <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 3h6v6H3V3zm0 8h6v6H3v-6zm8-8h6v6h-6V3zm0 8h6v6h-6v-6z" />
+                                    </svg>
+                                </div>
+                                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl sm:rounded-2xl blur opacity-30 group-hover:opacity-60 transition-opacity duration-300"></div>
                             </div>
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                            <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                                 Jira
-                            </h1>
-                            <p className="text-xs text-gray-500">{formatTime(currentTime)}</p>
+                            </span>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="text-sm font-medium text-gray-800">{user?.full_name}</p>
-                        </div>
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
-                            {user?.full_name?.charAt(0)}
+                        <div className="flex items-center space-x-4">
+                            <div className="text-right hidden sm:block">
+                                <p className="text-sm font-medium text-white/90">{user?.full_name}</p>
+                                <p className="text-xs text-white/60">{formatTime(currentTime)}</p>
+                            </div>
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg">
+                                {user?.full_name?.charAt(0)}
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="text-white/60 hover:text-white transition-colors duration-300 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base bg-transparent hover:bg-white/10 px-3 py-2 rounded-lg"
+                            >
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div className="flex">
-                {/* Enhanced Sidebar */}
-                <aside className="w-72 backdrop-blur-md bg-white/70 border-r border-white/20 min-h-screen shadow-xl">
-                    <div className="p-6 space-y-6">
+            <div className="flex flex-1 pt-16 sm:pt-20"> {/* Padding top to account for fixed header */}
+                {/* Sidebar */}
+                <aside className="w-64 lg:w-72 flex-shrink-0 bg-black/80 backdrop-blur-2xl border-r border-white/10 shadow-2xl overflow-y-auto">
+                    <div className="p-4 sm:p-6 space-y-6">
                         {/* Role Section */}
-                        <div className="space-y-4">
+                        <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 p-5 space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className={`px-3 py-2 rounded-lg bg-gradient-to-r ${getRoleColor(user?.role)} text-white text-xs font-semibold uppercase tracking-wider shadow-lg`}>
                                     {user?.role}
                                 </div>
-                                <button 
+                                <button
                                     onClick={handleRoleInfo}
-                                    className="p-2 rounded-lg hover:bg-white/50 transition-all duration-200 text-gray-600 hover:text-gray-800"
+                                    className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all duration-200"
                                 >
                                     <svg className={`w-4 h-4 transition-transform duration-200 ${showInfo ? 'rotate-90' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                     </svg>
                                 </button>
                             </div>
-                            
+
                             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showInfo ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                                    <p className="text-sm text-gray-700 leading-relaxed">{roleInfo}</p>
+                                <div className="p-4 bg-white/10 rounded-xl border border-white/20">
+                                    <p className="text-sm text-gray-300 leading-relaxed">{roleInfo}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Navigation */}
-                        <nav className="space-y-2">
-                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Navigation</h3>
+                        <nav className="space-y-3">
+                            <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2 px-3">Navigation</h3>
                             {navigationItems.map((item, index) => (
                                 <button
                                     key={index}
                                     onClick={() => navigate(item.path)}
-                                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white hover:bg-gray-50 transition-all duration-200 group border border-gray-200 hover:border-gray-300 hover:shadow-md"
+                                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 group border border-white/10 hover:border-white/20 hover:shadow-lg"
                                     title={item.description}
                                 >
-                                    <span className="text-lg group-hover:scale-110 transition-transform duration-200">{item.icon}</span>
-                                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{item.label}</span>
+                                    <span className="text-lg group-hover:scale-110 transition-transform duration-200 text-white">{item.icon}</span>
+                                    <span className="text-sm font-medium text-white/80 group-hover:text-white">{item.label}</span>
                                 </button>
                             ))}
                         </nav>
-
-                        {/* Sign Out */}
-                        <div className="pt-4 border-t border-gray-200/50">
-                            <button 
-                                onClick={handleLogout}
-                                className="w-full flex items-center gap-3 p-3 rounded-xl bg-white hover:bg-red-50 transition-all duration-200 group text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 hover:shadow-md"
-                            >
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                <span className="text-sm font-medium">Sign Out</span>
-                            </button>
-                        </div>
                     </div>
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 p-8">
+                <main className="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto">
                     {/* Welcome Section */}
-                    <div className="mb-8">
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 bg-clip-text text-transparent mb-2">
-                            {getGreeting()}, {user?.full_name?.split(' ')[0]}! 
+                    <div className="mb-8 p-6 bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10">
+                        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-300 bg-clip-text text-transparent mb-2">
+                            {getGreeting()}, {user?.full_name?.split(' ')[0]}!
                         </h1>
-                        <p className="text-lg text-gray-600">Ready to tackle your {user?.role.toLowerCase()} tasks today?</p>
+                        <p className="text-base sm:text-lg text-gray-300">Ready to tackle your {user?.role.toLowerCase()} tasks today?</p>
                     </div>
 
                     {/* Hero Section */}
-                    <div className="mb-8 backdrop-blur-sm bg-white/60 rounded-3xl border border-white/30 shadow-xl overflow-hidden">
-                        <div className="p-8 lg:p-12">
-                            <div className="grid lg:grid-cols-2 gap-8 items-center">
-                                <div className="space-y-6">
-                                    <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 leading-tight">
-                                        Supercharge Your 
-                                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Productivity</span>
-                                    </h2>
-                                    <p className="text-lg text-gray-600 leading-relaxed">
-                                        Transform your workflow with intelligent project management tools designed to help teams collaborate seamlessly and deliver exceptional results.
-                                    </p>
-                                </div>
-                                
-                                <div className="relative">
-                                    <div className="relative z-10 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/50">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                                                <div className="h-2 bg-gray-200 rounded flex-1"></div>
-                                            </div>
-                                            <div className="grid grid-cols-3 gap-3">
-                                                <div className="h-16 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg shadow-lg"></div>
-                                                <div className="h-16 bg-gradient-to-br from-green-400 to-green-500 rounded-lg shadow-lg"></div>
-                                                <div className="h-16 bg-gradient-to-br from-purple-400 to-purple-500 rounded-lg shadow-lg"></div>
-                                            </div>
-                                            <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full w-3/4 animate-pulse"></div>
-                                            </div>
+                    <div className="mb-8 p-6 sm:p-8 lg:p-10 bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
+                        <div className="grid lg:grid-cols-2 gap-8 items-center">
+                            <div className="space-y-6">
+                                <h2 className="text-3xl lg:text-4xl font-black text-white leading-tight">
+                                    Supercharge Your
+                                    <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
+                                        Productivity
+                                    </span>
+                                </h2>
+                                <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
+                                    Transform your workflow with intelligent project management tools designed to help teams collaborate seamlessly and deliver exceptional results.
+                                </p>
+                            </div>
+
+                            <div className="relative">
+                                <div className="relative z-10 bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/10">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                                            <div className="h-2 bg-white/20 rounded flex-1"></div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg"></div>
+                                            <div className="h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-lg shadow-lg"></div>
+                                            <div className="h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg shadow-lg"></div>
+                                        </div>
+                                        <div className="h-4 bg-white/10 rounded-full overflow-hidden">
+                                            <div className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full w-3/4 animate-pulse"></div>
                                         </div>
                                     </div>
-                                    <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full blur-2xl"></div>
-                                    <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-2xl"></div>
                                 </div>
+                                <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full blur-2xl"></div>
+                                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-2xl"></div>
                             </div>
                         </div>
                     </div>
@@ -300,19 +304,19 @@ const Dashboard = () => {
                                 color: "from-teal-500 to-blue-500"
                             }
                         ].map((feature, index) => (
-                            <div 
+                            <div
                                 key={index}
-                                className="group backdrop-blur-sm bg-white/60 rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                                className="group bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
                             >
                                 <div className="mb-4">
                                     <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                         {feature.icon}
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-gray-900 transition-colors duration-200">
+                                <h3 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-3 group-hover:text-white transition-colors duration-200">
                                     {feature.title}
                                 </h3>
-                                <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200">
+                                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-200">
                                     {feature.description}
                                 </p>
                             </div>
