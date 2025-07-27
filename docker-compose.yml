@@ -1,0 +1,44 @@
+# docker-compose.yml (save in root directory)
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./database.db
+      - ENVIRONMENT=production
+    volumes:
+      - ./backend:/app
+      - sqlite_data:/app/data  # Persistent storage for SQLite database
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# Named volumes
+volumes:
+  sqlite_data:  # Persistent storage for SQLite database
+
+# Networks
+networks:
+  app-network:
+    driver: bridge
