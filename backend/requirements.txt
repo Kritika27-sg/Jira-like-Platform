@@ -7,3 +7,6 @@ python-jose[cryptography]
 httpx
 python-multipart
 python-dotenv
+google-auth-oauthlib 
+email-validator
+bcrypt

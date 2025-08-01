@@ -17,7 +17,7 @@ router = APIRouter()
 GOOGLE_CLIENT_ID = "1080816176181-p23c90520lrbhc1blep9q4pak6j14ei3.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "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"
 GOOGLE_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
-SECRET_KEY = "your_jwt_secret_key" 
+SECRET_KEY = "jwt_secret_key" 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 

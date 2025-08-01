@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 
-SECRET_KEY = "your_jwt_secret_key" 
+SECRET_KEY = "jwt_secret_key" 
 ALGORITHM = "HS256"
 
 # This specifies the URL where the frontend can request a token 

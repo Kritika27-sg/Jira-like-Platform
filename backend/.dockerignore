@@ -1,4 +1,4 @@
-# Backend .dockerignore (save as backend/.dockerignore)
+# Backend .dockerignore 
 __pycache__/
 *.py[cod]
 *$py.class

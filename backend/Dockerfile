@@ -1,4 +1,4 @@
-# Backend Dockerfile (save as backend/Dockerfile)
+# Backend Dockerfile
 FROM python:3.11-slim
 
 # Set working directory
@@ -24,7 +24,8 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
-COPY . .
+COPY . . 
+
 
 # Create directory for SQLite database
 RUN mkdir -p /app/data
@@ -37,5 +38,6 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Command to run the application
-CMD ["python", "main.py"]
+# Command to run the application using uvicorn
+# 'main' refers to main.py, 'app' refers to the FastAPI object within main.py
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
