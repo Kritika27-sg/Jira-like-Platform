@@ -1,4 +1,4 @@
-# Frontend Dockerfile (save as frontend/Dockerfile)
+# Frontend Dockerfile 
 FROM node:18-alpine as build
 
 # Set working directory
